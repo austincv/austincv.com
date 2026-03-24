@@ -1,0 +1,67 @@
+[
+  {
+    "id": "dojo",
+    "company": "DOJO",
+    "title": "Lead Data Engineer",
+    "dates": "Apr 2021 – Oct 2025",
+    "accent": "#1a1a2e",
+    "icon": "D",
+    "headline": "Building data\nplatforms\nthat scale.",
+    "eyebrow": "Data Engineering",
+    "sub": "Designed a state-of-the-art analytics platform used by 18+ teams, saving ~£1.3M in compute costs.",
+    "headshot": "assets/headshots/dojo.jpg",
+    "logo": "assets/logos/dojo.png"
+  },
+  {
+    "id": "hummingbird",
+    "company": "Hummingbird",
+    "title": "Principal Technical Architect",
+    "dates": "Oct 2016 – Apr 2021",
+    "accent": "#1e4d2b",
+    "icon": "H",
+    "headline": "Shaping ML\npipelines from\nthe ground up.",
+    "eyebrow": "AI for Agriculture",
+    "sub": "Founding engineer — built the ML data pipeline and MLOps infrastructure for satellite image analysis.",
+    "headshot": "assets/headshots/hummingbird.jpg",
+    "logo": "assets/logos/hummingbird.png"
+  },
+  {
+    "id": "think-big",
+    "company": "Think Big",
+    "title": "Big Data Engineer",
+    "dates": "Jul 2016 – Oct 2016",
+    "accent": "#2d1b69",
+    "icon": "T",
+    "headline": "Moving big\ndata at\nVodafone scale.",
+    "eyebrow": "Big Data · Teradata",
+    "sub": "Migrated analytics infrastructure to a Spark cluster, reducing workflow time from days to hours.",
+    "headshot": "assets/headshots/think-big.jpg",
+    "logo": "assets/logos/think-big.png"
+  },
+  {
+    "id": "big-data-partnership",
+    "company": "Big Data Partnership",
+    "title": "Big Data Engineer",
+    "dates": "Sep 2014 – Jul 2016",
+    "accent": "#7c2d12",
+    "icon": "B",
+    "headline": "Sentiment,\nvideo & live\ninfrastructure.",
+    "eyebrow": "Big Data",
+    "sub": "Built Brandmatcher sentiment analysis, vehicle classification with deep learning, and ELK monitoring.",
+    "headshot": "assets/headshots/big-data-partnership.jpg",
+    "logo": "assets/logos/big-data-partnership.png"
+  },
+  {
+    "id": "mu-sigma",
+    "company": "Mu Sigma",
+    "title": "Senior Research Analyst",
+    "dates": "Jan 2014 – Aug 2014",
+    "accent": "#374151",
+    "icon": "μ",
+    "headline": "Research &\nalgorithms at\nthe start.",
+    "eyebrow": "Research · Bangalore",
+    "sub": "Led a team building a video processing framework on Hadoop and image algorithms in OpenCV/Python.",
+    "headshot": "assets/headshots/mu-sigma.jpg",
+    "logo": "assets/logos/mu-sigma.png"
+  }
+]
