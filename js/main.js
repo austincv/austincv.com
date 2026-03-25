@@ -37,19 +37,31 @@ function extractYears(dates) {
 
 // ─── DESKTOP ──────────────────────────────────────────────────
 function desktopInit(roles) {
+  const ac       = new AbortController();
+  const { signal } = ac;
+
   const card3d    = document.getElementById('card3d');
   const cardFront = document.getElementById('cardFront');
   const lpEyebrow  = document.getElementById('lpEyebrow');
   const lpHeadline = document.getElementById('lpHeadline');
   const lpSub      = document.getElementById('lpSub');
   const leftPanel  = document.getElementById('leftPanel');
+  const rightTrack = document.getElementById('rightTrack');
 
   let currentRole = 0;
   let animating   = false;
 
-  // Populate role sections
-  const sections = document.querySelectorAll('.role-section');
-  sections.forEach((sec, i) => { sec.dataset.role = i; });
+  // Ensure we start at the top when (re-)entering desktop view
+  window.scrollTo(0, 0);
+
+  // Create role sections dynamically
+  roles.forEach((_, i) => {
+    const sec = document.createElement('div');
+    sec.className = 'role-section';
+    sec.dataset.role = i;
+    rightTrack.appendChild(sec);
+  });
+  const sections = rightTrack.querySelectorAll('.role-section');
 
   // Build scroll nav
   const nav = document.createElement('nav');
@@ -59,7 +71,7 @@ function desktopInit(roles) {
     const item = document.createElement('div');
     item.className = 'scroll-nav-item';
     item.innerHTML = `<span class="scroll-nav-year">${extractYears(role.dates)}</span><span class="scroll-nav-dot"></span>`;
-    item.addEventListener('click', () => sections[i].scrollIntoView({ behavior: 'smooth' }));
+    item.addEventListener('click', () => sections[i].scrollIntoView({ behavior: 'smooth' }), { signal });
     nav.appendChild(item);
   });
   document.body.appendChild(nav);
@@ -91,31 +103,23 @@ function desktopInit(roles) {
   }
 
   // ── IDLE SWING + MOUSE TILT ────────────────────────────────
-  // Both are composed into a single transform each frame so they
-  // don't fight each other (CSS animations can't mix with JS transforms).
+  let swingPhase = 0;
+  let mouseNX = 0.5;
+  let mouseNY = 0.5;
+  let tiltX = 0, tiltY = 0;
 
-  let swingPhase = 0;         // drives sinusoidal idle sway
-  let mouseNX = 0.5;          // normalised mouse X [0..1]
-  let mouseNY = 0.5;          // normalised mouse Y [0..1]
-  let tiltX = 0, tiltY = 0;  // current interpolated tilt (degrees)
-
-  // Mouse tracking — normalised across the full viewport
   document.addEventListener('mousemove', e => {
     mouseNX = e.clientX / window.innerWidth;
     mouseNY = e.clientY / window.innerHeight;
-  });
+  }, { signal });
 
-  // Reset tilt gracefully when cursor leaves the window
-  document.addEventListener('mouseleave', () => { mouseNX = 0.5; mouseNY = 0.5; });
+  document.addEventListener('mouseleave', () => { mouseNX = 0.5; mouseNY = 0.5; }, { signal });
 
   function animTick() {
-    // Idle swing: gentle sinusoidal rock (-3° … +1°)
     swingPhase += 0.007;
     const swingDeg = Math.sin(swingPhase) * 2 - 1;
 
     if (!animating) {
-      // Only interpolate tilt when not flipping — prevents tilt from racing
-      // ahead during a flip and jumping when animTick resumes.
       const targetTY =  (mouseNX * 2 - 1) * 18;
       const targetTX = -(mouseNY * 2 - 1) * 12;
       tiltX += (targetTX - tiltX) * 0.09;
@@ -124,7 +128,6 @@ function desktopInit(roles) {
       card3d.style.transform =
         `perspective(600px) rotate(${swingDeg}deg) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
 
-      // Shadow shifts opposite to tilt direction (light from top-left)
       const sdx   = -tiltY * 2.0;
       const sdy   =  tiltX * 1.2 + 28;
       const blur  =  60 + Math.abs(tiltX) * 2.0 + Math.abs(tiltY) * 2.0;
@@ -133,26 +136,24 @@ function desktopInit(roles) {
         `drop-shadow(${sdx.toFixed(1)}px ${sdy.toFixed(1)}px ${blur.toFixed(0)}px rgba(0,0,0,${alpha.toFixed(3)}))`;
     }
 
-    requestAnimationFrame(animTick);
+    rafId = requestAnimationFrame(animTick);
   }
 
-  animTick();
+  let rafId = requestAnimationFrame(animTick);
 
   // ── CARD FLIP ──────────────────────────────────────────────
   function rotateTo(idx) {
     if (idx === currentRole || animating) return;
+    const prevRole = currentRole;
     animating = true;
     currentRole = idx;
 
     updateNav(idx);
 
-    // Flip direction: scrolling down (higher idx) → card exits right, enters from left.
-    // Scrolling up (lower idx) → card exits left, enters from right.
-    const dir    = idx > currentRole ? 1 : -1;
-    const exitY  =  dir * 28;   // e.g. +28 going forward, -28 going backward
-    const enterY = -dir * 28;   // opposite side to appear from
+    const dir    = idx > prevRole ? 1 : -1;
+    const exitY  =  dir * 28;
+    const enterY = -dir * 28;
 
-    // Phase 1: tilt + fade out — use same perspective as animTick (600px)
     card3d.style.transition = 'transform 0.2s cubic-bezier(0.4,0,1,1), opacity 0.2s ease-in';
     card3d.style.transform  = `perspective(600px) rotateY(${exitY}deg) rotate(-1deg)`;
     card3d.style.opacity    = '0';
@@ -165,7 +166,6 @@ function desktopInit(roles) {
       card3d.style.opacity    = '0';
       void card3d.offsetWidth;
 
-      // Phase 2: tilt back in + fade in
       card3d.style.transition = 'transform 0.28s cubic-bezier(0,0,0.2,1), opacity 0.24s ease-out';
       card3d.style.transform  = 'perspective(600px) rotateY(0deg) rotate(-2deg)';
       card3d.style.opacity    = '1';
@@ -173,40 +173,47 @@ function desktopInit(roles) {
       updateLeft(roles[idx]);
 
       setTimeout(() => {
-        // Sync state so the first animTick frame is identical to the flip's last frame.
-        // swingDeg = sin(phase)*2−1 = −2  →  sin(phase) = −0.5  →  phase = 7π/6
         swingPhase = Math.PI + Math.PI / 6;
         tiltX = 0;
         tiltY = 0;
         animating = false;
         card3d.style.transition = '';
         card3d.style.opacity    = '';
-        // Set transform explicitly so there is no blank frame before animTick fires.
         card3d.style.transform  = 'perspective(600px) rotate(-2deg) rotateX(0deg) rotateY(0deg)';
       }, 290);
     }, 210);
   }
 
   // ── SCROLL DETECTION ───────────────────────────────────────
-  let ticking = false;
-  window.addEventListener('scroll', () => {
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(() => {
-      ticking = false;
-      const vh = window.innerHeight;
-      let activeIdx = 0;
-      sections.forEach((sec, i) => {
-        const rect = sec.getBoundingClientRect();
-        if (rect.top < vh * 0.5) activeIdx = i;
-      });
-      if (activeIdx !== currentRole) rotateTo(activeIdx);
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const idx = parseInt(entry.target.dataset.role);
+        if (idx !== currentRole) rotateTo(idx);
+      }
     });
-  });
+  }, { rootMargin: '-50% 0px -50% 0px', threshold: 0 });
+
+  sections.forEach(sec => observer.observe(sec));
+
+  // ── DESTROY ────────────────────────────────────────────────
+  return function destroy() {
+    ac.abort();
+    cancelAnimationFrame(rafId);
+    observer.disconnect();
+    nav.remove();
+    rightTrack.innerHTML = '';
+    leftPanel.classList.remove('visible');
+    cardFront.innerHTML = '';
+    card3d.removeAttribute('style');
+  };
 }
 
 // ─── MOBILE ───────────────────────────────────────────────────
 function mobileInit(roles) {
+  const ac       = new AbortController();
+  const { signal } = ac;
+
   const swipeArea = document.getElementById('mobileSwipeArea');
   const progress  = document.getElementById('mobileProgress');
   const eyebrow   = document.getElementById('mobileEyebrow');
@@ -216,10 +223,9 @@ function mobileInit(roles) {
 
   const total = roles.length;
   let current = 0;
-  let slotW   = 0; // viewport slot width — one card per slot
+  let slotW   = 0;
 
   // ── BUILD ────────────────────────────────────────────────────
-  // Cards go directly into swipeArea, each absolutely positioned.
   const cards = roles.map(role => {
     const el = document.createElement('div');
     el.className = 'mobile-card';
@@ -235,9 +241,6 @@ function mobileInit(roles) {
   });
 
   // ── POSITION ────────────────────────────────────────────────
-  // Each card's natural X offset from centre: (i - current) * slotW.
-  // dragOffset adds a transient shift during a drag gesture.
-  // transition: 'none' during drag; ease-out for snap; spring for end bounce.
   function placeCards(dragOffset, transition) {
     cards.forEach((card, i) => {
       const x = (i - current) * slotW + dragOffset;
@@ -268,7 +271,6 @@ function mobileInit(roles) {
   let offsetX  = 0;
   let lastX    = 0, lastT = 0, flickVel = 0;
 
-  // Rubber-band resistance when pulling past the first or last card
   function resistEnd(raw) {
     if (current === 0         && raw > 0) return raw * 0.18;
     if (current === total - 1 && raw < 0) return raw * 0.18;
@@ -283,7 +285,7 @@ function mobileInit(roles) {
     lastX    = x;
     lastT    = performance.now();
     swipeArea.classList.add('dragging');
-    placeCards(0, 'none'); // kill any running transition
+    placeCards(0, 'none');
   }
 
   function onMove(x) {
@@ -292,7 +294,7 @@ function mobileInit(roles) {
     placeCards(offsetX, 'none');
     const now = performance.now();
     const dt  = now - lastT;
-    if (dt > 0) flickVel = ((x - lastX) / dt) * 16; // px/frame @ 60 fps
+    if (dt > 0) flickVel = ((x - lastX) / dt) * 16;
     lastX = x;
     lastT = now;
   }
@@ -306,34 +308,30 @@ function mobileInit(roles) {
                   (current === total - 1 && offsetX < 0);
 
     if (atEnd) {
-      // Spring back to centre
       placeCards(0, 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)');
     } else if (Math.abs(flickVel) > 3) {
-      // Flick gesture — advance one card in the flick direction
       goTo(current + (flickVel < 0 ? 1 : -1));
     } else if (Math.abs(offsetX) > slotW * 0.25) {
-      // Dragged past 25% threshold — commit to next/prev card
       goTo(current + (offsetX < 0 ? 1 : -1));
     } else {
-      // Insufficient drag — snap back to centre
       placeCards(0, 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)');
     }
   }
 
   // Touch
-  swipeArea.addEventListener('touchstart',  e => onStart(e.touches[0].clientX), { passive: true });
-  swipeArea.addEventListener('touchmove',   e => onMove(e.touches[0].clientX),  { passive: true });
-  swipeArea.addEventListener('touchend',    () => onEnd());
-  swipeArea.addEventListener('touchcancel', () => onEnd());
+  swipeArea.addEventListener('touchstart',  e => onStart(e.touches[0].clientX), { passive: true, signal });
+  swipeArea.addEventListener('touchmove',   e => onMove(e.touches[0].clientX),  { passive: true, signal });
+  swipeArea.addEventListener('touchend',    () => onEnd(), { signal });
+  swipeArea.addEventListener('touchcancel', () => onEnd(), { signal });
 
   // Mouse (for desktop testing)
-  swipeArea.addEventListener('mousedown',  e => { onStart(e.clientX); e.preventDefault(); });
-  window.addEventListener('mousemove',     e => onMove(e.clientX));
-  window.addEventListener('mouseup',       () => onEnd());
+  swipeArea.addEventListener('mousedown', e => { onStart(e.clientX); e.preventDefault(); }, { signal });
+  window.addEventListener('mousemove',    e => onMove(e.clientX),  { signal });
+  window.addEventListener('mouseup',      () => onEnd(),           { signal });
 
   // Buttons
-  btnPrev.addEventListener('click', () => goTo(current - 1));
-  btnNext.addEventListener('click', () => goTo(current + 1));
+  btnPrev.addEventListener('click', () => goTo(current - 1), { signal });
+  btnNext.addEventListener('click', () => goTo(current + 1), { signal });
 
   // ── INIT ─────────────────────────────────────────────────────
   requestAnimationFrame(() => {
@@ -341,13 +339,35 @@ function mobileInit(roles) {
     placeCards(0, 'none');
     updateMeta();
   });
+
+  const ro = new ResizeObserver(() => {
+    slotW = swipeArea.offsetWidth;
+    placeCards(0, 'none');
+  });
+  ro.observe(swipeArea);
+
+  // ── DESTROY ──────────────────────────────────────────────────
+  return function destroy() {
+    ac.abort();
+    ro.disconnect();
+    swipeArea.innerHTML = '';
+    progress.innerHTML  = '';
+    eyebrow.textContent = '';
+    desc.textContent    = '';
+  };
 }
 
 // ─── BOOTSTRAP ────────────────────────────────────────────────
+const mq = window.matchMedia('(max-width: 768px)');
+
 fetch('data/roles.json')
   .then(res => res.json())
   .then(roles => {
-    desktopInit(roles);
-    mobileInit(roles);
+    let destroy = mq.matches ? mobileInit(roles) : desktopInit(roles);
+
+    mq.addEventListener('change', e => {
+      destroy();
+      destroy = e.matches ? mobileInit(roles) : desktopInit(roles);
+    });
   })
   .catch(err => console.error('Failed to load roles.json:', err));

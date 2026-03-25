@@ -98,7 +98,6 @@ body {
   padding-bottom: 2px;
   transition: opacity .2s;
 }
-.links a:hover { opacity: .4; }
 
 /* Right scroll track */
 .right-track {
@@ -144,7 +143,6 @@ body {
   background: #fff;
 }
 
-.card-face.back { display: none; }
 
 /* Card interior */
 .card-inner {
@@ -452,7 +450,6 @@ body {
     cursor: pointer;
     transition: border-color .2s;
   }
-  .mobile-nav button:hover { border-color: #aaa; }
 
   .mobile-links {
     flex-shrink: 0;
@@ -483,4 +480,11 @@ body {
     transition: background .2s, color .2s;
   }
 
+}
+
+/* ─── HOVER (pointer devices only) ───────────────────────── */
+@media (hover: hover) {
+  .links a:hover { opacity: .4; }
+  .mobile-nav button:hover { border-color: #aaa; }
+  .mobile-links a:hover { background: #f0f0f0; }
 }
