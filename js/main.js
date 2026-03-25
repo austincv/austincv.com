@@ -26,6 +26,15 @@ function buildCardInner(role) {
     </div>`;
 }
 
+// ─── HELPERS ──────────────────────────────────────────────────
+function extractYears(dates) {
+  const years = dates.match(/\d{4}/g);
+  if (!years) return dates;
+  return years.length >= 2 && years[0] !== years[years.length - 1]
+    ? years[0] + '–' + years[years.length - 1]
+    : years[0];
+}
+
 // ─── DESKTOP ──────────────────────────────────────────────────
 function desktopInit(roles) {
   const card3d    = document.getElementById('card3d');
@@ -39,15 +48,35 @@ function desktopInit(roles) {
   let animating   = false;
 
   // Populate role sections
-  document.querySelectorAll('.role-section').forEach((sec, i) => {
-    sec.dataset.role = i;
+  const sections = document.querySelectorAll('.role-section');
+  sections.forEach((sec, i) => { sec.dataset.role = i; });
+
+  // Build scroll nav
+  const nav = document.createElement('nav');
+  nav.className = 'scroll-nav';
+  nav.setAttribute('aria-label', 'Jump to role');
+  roles.forEach((role, i) => {
+    const item = document.createElement('div');
+    item.className = 'scroll-nav-item';
+    item.innerHTML = `<span class="scroll-nav-year">${extractYears(role.dates)}</span><span class="scroll-nav-dot"></span>`;
+    item.addEventListener('click', () => sections[i].scrollIntoView({ behavior: 'smooth' }));
+    nav.appendChild(item);
   });
+  document.body.appendChild(nav);
+
+  function updateNav(idx) {
+    nav.querySelectorAll('.scroll-nav-item').forEach((item, i) => {
+      item.classList.toggle('active', i === idx);
+      if (i === idx) item.style.setProperty('--nav-accent', roles[idx].accent);
+    });
+  }
 
   // Populate initial card and left panel
   cardFront.innerHTML = buildCardInner(roles[0]);
   lpEyebrow.textContent  = roles[0].eyebrow;
   lpHeadline.innerHTML   = roles[0].headline.replace(/\n/g, '<br>');
   lpSub.textContent      = roles[0].sub;
+  updateNav(0);
 
   setTimeout(() => leftPanel.classList.add('visible'), 200);
 
@@ -61,28 +90,33 @@ function desktopInit(roles) {
     }, 280);
   }
 
-  function setCardTransform(rotY, tilt) {
-    card3d.style.transform = `perspective(900px) rotateY(${rotY}deg) rotate(${tilt}deg)`;
-  }
-
   function rotateTo(idx) {
     if (idx === currentRole || animating) return;
     animating = true;
     currentRole = idx;
 
+    updateNav(idx);
     card3d.classList.remove('swinging');
-    card3d.style.transition = 'transform 0.28s cubic-bezier(0.4,0,1,1)';
-    setCardTransform(90, -1);
+
+    // Phase 1: tilt + fade out (~200ms)
+    card3d.style.transition = 'transform 0.2s cubic-bezier(0.4,0,1,1), opacity 0.2s ease-in';
+    card3d.style.transform  = 'perspective(900px) rotateY(28deg) rotate(-1deg)';
+    card3d.style.opacity    = '0';
 
     setTimeout(() => {
+      // Swap content while invisible
       cardFront.innerHTML = buildCardInner(roles[idx]);
 
+      // Reset to opposite tilt instantly
       card3d.style.transition = 'none';
-      setCardTransform(-90, -1);
-      void card3d.offsetWidth;
+      card3d.style.transform  = 'perspective(900px) rotateY(-28deg) rotate(-1deg)';
+      card3d.style.opacity    = '0';
+      void card3d.offsetWidth; // force reflow
 
-      card3d.style.transition = 'transform 0.32s cubic-bezier(0,0,0.3,1)';
-      setCardTransform(0, -2);
+      // Phase 2: tilt back in + fade in (~280ms)
+      card3d.style.transition = 'transform 0.28s cubic-bezier(0,0,0.2,1), opacity 0.24s ease-out';
+      card3d.style.transform  = 'perspective(900px) rotateY(0deg) rotate(-2deg)';
+      card3d.style.opacity    = '1';
 
       updateLeft(roles[idx]);
 
@@ -90,9 +124,10 @@ function desktopInit(roles) {
         animating = false;
         card3d.style.transition = '';
         card3d.style.transform  = '';
+        card3d.style.opacity    = '';
         card3d.classList.add('swinging');
-      }, 340);
-    }, 290);
+      }, 290);
+    }, 210);
   }
 
   let ticking = false;
@@ -101,7 +136,6 @@ function desktopInit(roles) {
     ticking = true;
     requestAnimationFrame(() => {
       ticking = false;
-      const sections = document.querySelectorAll('.role-section');
       const vh = window.innerHeight;
       let activeIdx = 0;
       sections.forEach((sec, i) => {

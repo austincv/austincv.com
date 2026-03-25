@@ -19,6 +19,7 @@
 html {
   scroll-behavior: auto;
   color-scheme: only light;
+  scroll-snap-type: y mandatory;
 }
 
 body {
@@ -317,14 +318,64 @@ body {
 
 /* Role sections */
 .role-section {
-  height: 120vh;
-}
-.role-section:first-child {
   height: 100vh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* ─── SCROLL NAV ──────────────────────────────────────── */
+.scroll-nav {
+  position: fixed;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  z-index: 20;
+}
+
+.scroll-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  justify-content: flex-end;
+}
+
+.scroll-nav-year {
+  font-size: 10px;
+  letter-spacing: .06em;
+  color: #ccc;
+  transition: color .35s, font-weight .35s;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.scroll-nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1.5px solid #ccc;
+  background: transparent;
+  flex-shrink: 0;
+  transition: background .35s, border-color .35s, transform .35s;
+}
+
+.scroll-nav-item.active .scroll-nav-year {
+  color: var(--nav-accent, #0d0d0d);
+  font-weight: 500;
+}
+
+.scroll-nav-item.active .scroll-nav-dot {
+  background: var(--nav-accent, #0d0d0d);
+  border-color: var(--nav-accent, #0d0d0d);
+  transform: scale(1.4);
 }
 
 /* ─── MOBILE ───────────────────────────────────────────── */
 @media (max-width: 768px) {
+  .scroll-nav { display: none; }
   .desktop { display: none; }
 
   .mobile {
