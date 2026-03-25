@@ -1,5 +1,18 @@
 [
   {
+    "id": "hartree",
+    "company": "Hartree Partners",
+    "title": "Tech Lead · Power & Gas Analytics",
+    "dates": "Mar 2026 – Present",
+    "accent": "#0d2358",
+    "icon": "H",
+    "headline": "Data at the\nspeed of\nenergy markets.",
+    "eyebrow": "Energy Trading · EMEA",
+    "sub": "Tech Lead for EMEA Power & Gas Analytics — building data infrastructure at the intersection of energy markets and machine learning.",
+    "headshot": "assets/headshots/dojo.jpg",
+    "logo": "assets/logos/hartree.png"
+  },
+  {
     "id": "dojo",
     "company": "DOJO",
     "title": "Lead Data Engineer",
@@ -30,7 +43,7 @@
     "company": "Think Big",
     "title": "Big Data Engineer",
     "dates": "Jul 2016 – Oct 2016",
-    "accent": "#2d1b69",
+    "accent": "#c84b00",
     "icon": "T",
     "headline": "Moving big\ndata at\nVodafone scale.",
     "eyebrow": "Big Data · Teradata",
@@ -56,7 +69,7 @@
     "company": "Mu Sigma",
     "title": "Senior Research Analyst",
     "dates": "Jan 2014 – Aug 2014",
-    "accent": "#374151",
+    "accent": "#7a1a1a",
     "icon": "μ",
     "headline": "Research &\nalgorithms at\nthe start.",
     "eyebrow": "Research · Bangalore",
