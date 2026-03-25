@@ -90,46 +90,104 @@ function desktopInit(roles) {
     }, 280);
   }
 
+  // ── IDLE SWING + MOUSE TILT ────────────────────────────────
+  // Both are composed into a single transform each frame so they
+  // don't fight each other (CSS animations can't mix with JS transforms).
+
+  let swingPhase = 0;         // drives sinusoidal idle sway
+  let mouseNX = 0.5;          // normalised mouse X [0..1]
+  let mouseNY = 0.5;          // normalised mouse Y [0..1]
+  let tiltX = 0, tiltY = 0;  // current interpolated tilt (degrees)
+
+  // Mouse tracking — normalised across the full viewport
+  document.addEventListener('mousemove', e => {
+    mouseNX = e.clientX / window.innerWidth;
+    mouseNY = e.clientY / window.innerHeight;
+  });
+
+  // Reset tilt gracefully when cursor leaves the window
+  document.addEventListener('mouseleave', () => { mouseNX = 0.5; mouseNY = 0.5; });
+
+  function animTick() {
+    // Idle swing: gentle sinusoidal rock (-3° … +1°)
+    swingPhase += 0.007;
+    const swingDeg = Math.sin(swingPhase) * 2 - 1;
+
+    if (!animating) {
+      // Only interpolate tilt when not flipping — prevents tilt from racing
+      // ahead during a flip and jumping when animTick resumes.
+      const targetTY =  (mouseNX * 2 - 1) * 18;
+      const targetTX = -(mouseNY * 2 - 1) * 12;
+      tiltX += (targetTX - tiltX) * 0.09;
+      tiltY += (targetTY - tiltY) * 0.09;
+
+      card3d.style.transform =
+        `perspective(600px) rotate(${swingDeg}deg) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+
+      // Shadow shifts opposite to tilt direction (light from top-left)
+      const sdx   = -tiltY * 2.0;
+      const sdy   =  tiltX * 1.2 + 28;
+      const blur  =  60 + Math.abs(tiltX) * 2.0 + Math.abs(tiltY) * 2.0;
+      const alpha =  0.28 + Math.abs(tiltX) * 0.010 + Math.abs(tiltY) * 0.010;
+      card3d.style.filter =
+        `drop-shadow(${sdx.toFixed(1)}px ${sdy.toFixed(1)}px ${blur.toFixed(0)}px rgba(0,0,0,${alpha.toFixed(3)}))`;
+    }
+
+    requestAnimationFrame(animTick);
+  }
+
+  animTick();
+
+  // ── CARD FLIP ──────────────────────────────────────────────
   function rotateTo(idx) {
     if (idx === currentRole || animating) return;
     animating = true;
     currentRole = idx;
 
     updateNav(idx);
-    card3d.classList.remove('swinging');
 
-    // Phase 1: tilt + fade out (~200ms)
+    // Flip direction: scrolling down (higher idx) → card exits right, enters from left.
+    // Scrolling up (lower idx) → card exits left, enters from right.
+    const dir    = idx > currentRole ? 1 : -1;
+    const exitY  =  dir * 28;   // e.g. +28 going forward, -28 going backward
+    const enterY = -dir * 28;   // opposite side to appear from
+
+    // Phase 1: tilt + fade out — use same perspective as animTick (600px)
     card3d.style.transition = 'transform 0.2s cubic-bezier(0.4,0,1,1), opacity 0.2s ease-in';
-    card3d.style.transform  = 'perspective(900px) rotateY(28deg) rotate(-1deg)';
+    card3d.style.transform  = `perspective(600px) rotateY(${exitY}deg) rotate(-1deg)`;
     card3d.style.opacity    = '0';
 
     setTimeout(() => {
-      // Swap content while invisible
       cardFront.innerHTML = buildCardInner(roles[idx]);
 
-      // Reset to opposite tilt instantly
       card3d.style.transition = 'none';
-      card3d.style.transform  = 'perspective(900px) rotateY(-28deg) rotate(-1deg)';
+      card3d.style.transform  = `perspective(600px) rotateY(${enterY}deg) rotate(-1deg)`;
       card3d.style.opacity    = '0';
-      void card3d.offsetWidth; // force reflow
+      void card3d.offsetWidth;
 
-      // Phase 2: tilt back in + fade in (~280ms)
+      // Phase 2: tilt back in + fade in
       card3d.style.transition = 'transform 0.28s cubic-bezier(0,0,0.2,1), opacity 0.24s ease-out';
-      card3d.style.transform  = 'perspective(900px) rotateY(0deg) rotate(-2deg)';
+      card3d.style.transform  = 'perspective(600px) rotateY(0deg) rotate(-2deg)';
       card3d.style.opacity    = '1';
 
       updateLeft(roles[idx]);
 
       setTimeout(() => {
+        // Sync state so the first animTick frame is identical to the flip's last frame.
+        // swingDeg = sin(phase)*2−1 = −2  →  sin(phase) = −0.5  →  phase = 7π/6
+        swingPhase = Math.PI + Math.PI / 6;
+        tiltX = 0;
+        tiltY = 0;
         animating = false;
         card3d.style.transition = '';
-        card3d.style.transform  = '';
         card3d.style.opacity    = '';
-        card3d.classList.add('swinging');
+        // Set transform explicitly so there is no blank frame before animTick fires.
+        card3d.style.transform  = 'perspective(600px) rotate(-2deg) rotateX(0deg) rotateY(0deg)';
       }, 290);
     }, 210);
   }
 
+  // ── SCROLL DETECTION ───────────────────────────────────────
   let ticking = false;
   window.addEventListener('scroll', () => {
     if (ticking) return;
@@ -149,22 +207,25 @@ function desktopInit(roles) {
 
 // ─── MOBILE ───────────────────────────────────────────────────
 function mobileInit(roles) {
-  const stack    = document.getElementById('mobileCardStack');
-  const progress = document.getElementById('mobileProgress');
-  const eyebrow  = document.getElementById('mobileEyebrow');
-  const desc     = document.getElementById('mobileDesc');
-  const btnPrev  = document.getElementById('mPrev');
-  const btnNext  = document.getElementById('mNext');
+  const swipeArea = document.getElementById('mobileSwipeArea');
+  const progress  = document.getElementById('mobileProgress');
+  const eyebrow   = document.getElementById('mobileEyebrow');
+  const desc      = document.getElementById('mobileDesc');
+  const btnPrev   = document.getElementById('mPrev');
+  const btnNext   = document.getElementById('mNext');
 
+  const total = roles.length;
   let current = 0;
-  const total  = roles.length;
+  let slotW   = 0; // viewport slot width — one card per slot
 
-  roles.forEach((role, i) => {
-    const card = document.createElement('div');
-    card.className = 'mobile-card';
-    card.innerHTML = buildCardInner(role);
-    card.dataset.idx = i;
-    stack.appendChild(card);
+  // ── BUILD ────────────────────────────────────────────────────
+  // Cards go directly into swipeArea, each absolutely positioned.
+  const cards = roles.map(role => {
+    const el = document.createElement('div');
+    el.className = 'mobile-card';
+    el.innerHTML = buildCardInner(role);
+    swipeArea.appendChild(el);
+    return el;
   });
 
   roles.forEach(() => {
@@ -173,95 +234,113 @@ function mobileInit(roles) {
     progress.appendChild(dot);
   });
 
-  function getCardEl(idx) {
-    return stack.querySelector(`[data-idx="${idx}"]`);
+  // ── POSITION ────────────────────────────────────────────────
+  // Each card's natural X offset from centre: (i - current) * slotW.
+  // dragOffset adds a transient shift during a drag gesture.
+  // transition: 'none' during drag; ease-out for snap; spring for end bounce.
+  function placeCards(dragOffset, transition) {
+    cards.forEach((card, i) => {
+      const x = (i - current) * slotW + dragOffset;
+      card.style.transition = transition;
+      card.style.transform  = `translateX(calc(-50% + ${x.toFixed(1)}px)) translateY(-50%)`;
+    });
   }
 
-  function updateUI() {
-    roles.forEach((_, i) => {
-      const el = getCardEl(i);
-      el.className = 'mobile-card';
-      if (i === current) el.classList.add('active');
-      else if (i === current - 1) el.classList.add('behind-l');
-      else if (i === current + 1) el.classList.add('behind-r');
-      else el.classList.add(i < current ? 'prev' : 'next');
-    });
-
-    document.querySelectorAll('.mobile-progress-dot').forEach((d, i) => {
+  // ── META ─────────────────────────────────────────────────────
+  function updateMeta() {
+    progress.querySelectorAll('.mobile-progress-dot').forEach((d, i) => {
       d.classList.toggle('active', i === current);
     });
-
     eyebrow.textContent = roles[current].company + ' · ' + roles[current].dates;
     desc.textContent    = roles[current].sub;
   }
 
+  // ── NAVIGATION ───────────────────────────────────────────────
   function goTo(idx) {
     current = Math.max(0, Math.min(total - 1, idx));
-    updateUI();
+    placeCards(0, 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)');
+    updateMeta();
   }
 
+  // ── DRAG ─────────────────────────────────────────────────────
+  let dragging = false;
+  let startX   = 0;
+  let offsetX  = 0;
+  let lastX    = 0, lastT = 0, flickVel = 0;
+
+  // Rubber-band resistance when pulling past the first or last card
+  function resistEnd(raw) {
+    if (current === 0         && raw > 0) return raw * 0.18;
+    if (current === total - 1 && raw < 0) return raw * 0.18;
+    return raw;
+  }
+
+  function onStart(x) {
+    dragging = true;
+    startX   = x;
+    offsetX  = 0;
+    flickVel = 0;
+    lastX    = x;
+    lastT    = performance.now();
+    swipeArea.classList.add('dragging');
+    placeCards(0, 'none'); // kill any running transition
+  }
+
+  function onMove(x) {
+    if (!dragging) return;
+    offsetX = resistEnd(x - startX);
+    placeCards(offsetX, 'none');
+    const now = performance.now();
+    const dt  = now - lastT;
+    if (dt > 0) flickVel = ((x - lastX) / dt) * 16; // px/frame @ 60 fps
+    lastX = x;
+    lastT = now;
+  }
+
+  function onEnd() {
+    if (!dragging) return;
+    dragging = false;
+    swipeArea.classList.remove('dragging');
+
+    const atEnd = (current === 0 && offsetX > 0) ||
+                  (current === total - 1 && offsetX < 0);
+
+    if (atEnd) {
+      // Spring back to centre
+      placeCards(0, 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)');
+    } else if (Math.abs(flickVel) > 3) {
+      // Flick gesture — advance one card in the flick direction
+      goTo(current + (flickVel < 0 ? 1 : -1));
+    } else if (Math.abs(offsetX) > slotW * 0.25) {
+      // Dragged past 25% threshold — commit to next/prev card
+      goTo(current + (offsetX < 0 ? 1 : -1));
+    } else {
+      // Insufficient drag — snap back to centre
+      placeCards(0, 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)');
+    }
+  }
+
+  // Touch
+  swipeArea.addEventListener('touchstart',  e => onStart(e.touches[0].clientX), { passive: true });
+  swipeArea.addEventListener('touchmove',   e => onMove(e.touches[0].clientX),  { passive: true });
+  swipeArea.addEventListener('touchend',    () => onEnd());
+  swipeArea.addEventListener('touchcancel', () => onEnd());
+
+  // Mouse (for desktop testing)
+  swipeArea.addEventListener('mousedown',  e => { onStart(e.clientX); e.preventDefault(); });
+  window.addEventListener('mousemove',     e => onMove(e.clientX));
+  window.addEventListener('mouseup',       () => onEnd());
+
+  // Buttons
   btnPrev.addEventListener('click', () => goTo(current - 1));
   btnNext.addEventListener('click', () => goTo(current + 1));
 
-  let startX = 0, startY = 0, isDragging = false;
-  const THRESHOLD = 60;
-
-  stack.addEventListener('touchstart', e => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    isDragging = true;
-  }, { passive: true });
-
-  stack.addEventListener('touchmove', e => {
-    if (!isDragging) return;
-    const dx = e.touches[0].clientX - startX;
-    const dy = e.touches[0].clientY - startY;
-    if (Math.abs(dx) > Math.abs(dy)) {
-      const card = getCardEl(current);
-      card.style.transform = `translateX(${dx}px) scale(1)`;
-      card.classList.add('dragging');
-    }
-  }, { passive: true });
-
-  stack.addEventListener('touchend', e => {
-    if (!isDragging) return;
-    isDragging = false;
-    const dx = e.changedTouches[0].clientX - startX;
-    const card = getCardEl(current);
-    card.classList.remove('dragging');
-    card.style.transform = '';
-    if (dx < -THRESHOLD) goTo(current + 1);
-    else if (dx > THRESHOLD) goTo(current - 1);
+  // ── INIT ─────────────────────────────────────────────────────
+  requestAnimationFrame(() => {
+    slotW = swipeArea.offsetWidth;
+    placeCards(0, 'none');
+    updateMeta();
   });
-
-  let mouseStart = 0, mouseDown = false;
-  stack.addEventListener('mousedown', e => { mouseStart = e.clientX; mouseDown = true; });
-  stack.addEventListener('mousemove', e => {
-    if (!mouseDown) return;
-    const card = getCardEl(current);
-    card.style.transform = `translateX(${e.clientX - mouseStart}px) scale(1)`;
-    card.classList.add('dragging');
-  });
-  stack.addEventListener('mouseup', e => {
-    if (!mouseDown) return;
-    mouseDown = false;
-    const dx = e.clientX - mouseStart;
-    const card = getCardEl(current);
-    card.classList.remove('dragging');
-    card.style.transform = '';
-    if (dx < -THRESHOLD) goTo(current + 1);
-    else if (dx > THRESHOLD) goTo(current - 1);
-  });
-  stack.addEventListener('mouseleave', () => {
-    if (mouseDown) {
-      mouseDown = false;
-      const card = getCardEl(current);
-      card.classList.remove('dragging');
-      card.style.transform = '';
-    }
-  });
-
-  updateUI();
 }
 
 // ─── BOOTSTRAP ────────────────────────────────────────────────

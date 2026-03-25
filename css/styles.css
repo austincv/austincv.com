@@ -13,7 +13,7 @@
   --grey: #888;
   --light: #e8e8e4;
   --card-w: 260px;
-  --card-h: 360px;
+  --card-h: 412px; /* ISO/IEC 7810 ID-1 portrait: 85.60×53.98 mm → 260×412 px */
 }
 
 html {
@@ -123,60 +123,23 @@ body {
   width: var(--card-w);
 }
 
-/* Lanyard */
-.lanyard {
-  position: absolute;
-  top: -80px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.lanyard-cord {
-  width: 3px;
-  height: 60px;
-  background: linear-gradient(180deg, #c8c8c8, #a0a0a0);
-  border-radius: 2px;
-}
-
-.lanyard-clip {
-  width: 14px;
-  height: 18px;
-  border: 2.5px solid #999;
-  border-radius: 3px 3px 6px 6px;
-  background: #d4d4d4;
-  margin-top: -1px;
-}
-
-/* Card container */
+/* Card container — transform driven by JS (swing + mouse tilt) */
 .card-3d {
   width: var(--card-w);
   height: var(--card-h);
-  border-radius: 12px;
+  border-radius: 15px; /* 3.18mm / 53.98mm × 260px */
   overflow: hidden;
   background: #fff;
-  filter: drop-shadow(0 30px 60px rgba(0,0,0,.18));
-  transform: rotate(-2deg);
+  filter: drop-shadow(0 32px 60px rgba(0,0,0,.28));
   position: relative;
-}
-
-.card-3d.swinging {
-  animation: swing 4s ease-in-out infinite;
-}
-
-@keyframes swing {
-  0%,100% { transform: rotate(-2deg); }
-  25%      { transform: rotate(1deg); }
-  75%      { transform: rotate(-3deg); }
+  will-change: transform, filter;
 }
 
 /* The single visible face */
 .card-face {
   position: absolute;
   inset: 0;
-  border-radius: 12px;
+  border-radius: 15px;
   overflow: hidden;
   background: #fff;
 }
@@ -211,8 +174,8 @@ body {
 }
 
 .card-photo {
-  width: 90px;
-  height: 90px;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
   object-fit: cover;
   object-position: center top;
@@ -222,8 +185,8 @@ body {
 }
 
 .card-photo-placeholder {
-  width: 90px;
-  height: 90px;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
   background: #e8e8e8;
   margin-bottom: 18px;
@@ -407,40 +370,29 @@ body {
 
   .mobile-swipe-area {
     flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     position: relative;
     overflow: hidden;
     min-height: 0;
+    cursor: grab;
   }
+  .mobile-swipe-area.dragging { cursor: grabbing; }
 
-  .mobile-card-stack {
-    position: relative;
-    width: min(260px, 72vw);
-    height: min(360px, 58vh);
-    --card-w: min(260px, 72vw);
-    --card-h: min(360px, 58vh);
-  }
-
+  /* Each card is individually positioned — JS sets translateX per card */
   .mobile-card {
     position: absolute;
-    inset: 0;
-    border-radius: 12px;
+    top: 50%;
+    left: 50%;
+    /* translateX(calc(-50% + Npx)) translateY(-50%) set entirely by JS */
+    height: min(var(--card-h), 56dvh); /* ISO/IEC 7810 ID-1 height, capped for small screens */
+    aspect-ratio: 53.98 / 85.60;       /* exact credit-card ratio — width derived from height */
+    border-radius: 15px;
     background: #fff;
-    box-shadow: 0 16px 48px rgba(0,0,0,.14);
-    transition: transform .4s cubic-bezier(0.4,0,0.2,1), opacity .4s;
     overflow: hidden;
-    cursor: grab;
+    box-shadow: 0 28px 56px rgba(0,0,0,.28), 0 6px 16px rgba(0,0,0,.10);
+    will-change: transform;
     user-select: none;
+    -webkit-user-drag: none;
   }
-
-  .mobile-card.active   { transform: translateX(0) scale(1);     opacity: 1;  z-index: 3; }
-  .mobile-card.prev     { transform: translateX(-100%) scale(.9); opacity: 0;  z-index: 1; }
-  .mobile-card.next     { transform: translateX(100%)  scale(.9); opacity: 0;  z-index: 1; }
-  .mobile-card.behind-l { transform: translateX(-10px) scale(.94); opacity: .4; z-index: 2; }
-  .mobile-card.behind-r { transform: translateX(10px)  scale(.94); opacity: .4; z-index: 2; pointer-events: none; }
-  .mobile-card.dragging { transition: none; cursor: grabbing; }
 
   .mobile-progress {
     flex-shrink: 0;
@@ -531,16 +483,4 @@ body {
     transition: background .2s, color .2s;
   }
 
-  .mobile-card-stack .card-inner {
-    padding: 20px 16px 16px;
-  }
-  .mobile-card-stack .card-photo,
-  .mobile-card-stack .card-photo-placeholder {
-    width: 72px;
-    height: 72px;
-    margin-bottom: 12px;
-  }
-  .mobile-card-stack .card-photo-placeholder { font-size: 22px; }
-  .mobile-card-stack .card-name { font-size: 15px; margin-bottom: 4px; }
-  .mobile-card-stack .card-label { margin-bottom: 12px; }
 }
