@@ -120,18 +120,27 @@ body {
 .id-card-wrap {
   position: relative;
   width: var(--card-w);
+  height: var(--card-h);
 }
 
-/* Card container — transform driven by JS (swing + mouse tilt) */
+/* Shadow on a sibling so filter never flattens preserve-3d */
+.card-shadow {
+  position: absolute;
+  inset: 0;
+  border-radius: 15px;
+  box-shadow: 0 28px 60px rgba(0,0,0,.28);
+  pointer-events: none;
+}
+
+/* Card container — transform driven by JS (swing + mouse tilt + flip) */
 .card-3d {
   width: var(--card-w);
   height: var(--card-h);
-  border-radius: 15px; /* 3.18mm / 53.98mm × 260px */
+  border-radius: 15px;
   overflow: hidden;
   background: #fff;
-  filter: drop-shadow(0 32px 60px rgba(0,0,0,.28));
   position: relative;
-  will-change: transform, filter;
+  will-change: transform;
 }
 
 /* The single visible face */

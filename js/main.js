@@ -40,8 +40,9 @@ function desktopInit(roles) {
   const ac       = new AbortController();
   const { signal } = ac;
 
-  const card3d    = document.getElementById('card3d');
-  const cardFront = document.getElementById('cardFront');
+  const card3d     = document.getElementById('card3d');
+  const cardFront  = document.getElementById('cardFront');
+  const cardShadow = document.getElementById('cardShadow');
   const lpEyebrow  = document.getElementById('lpEyebrow');
   const lpHeadline = document.getElementById('lpHeadline');
   const lpSub      = document.getElementById('lpSub');
@@ -127,14 +128,15 @@ function desktopInit(roles) {
 
       card3d.style.transform =
         `perspective(600px) rotate(${swingDeg}deg) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
-
-      const sdx   = -tiltY * 2.0;
-      const sdy   =  tiltX * 1.2 + 28;
-      const blur  =  60 + Math.abs(tiltX) * 2.0 + Math.abs(tiltY) * 2.0;
-      const alpha =  0.28 + Math.abs(tiltX) * 0.010 + Math.abs(tiltY) * 0.010;
-      card3d.style.filter =
-        `drop-shadow(${sdx.toFixed(1)}px ${sdy.toFixed(1)}px ${blur.toFixed(0)}px rgba(0,0,0,${alpha.toFixed(3)}))`;
     }
+
+    // Shadow always updates — no blink during flip
+    const sdx  = -tiltY * 2.0;
+    const sdy  =  tiltX * 1.2 + 28;
+    const blur =  60 + Math.abs(tiltX) * 2.0 + Math.abs(tiltY) * 2.0;
+    const alph =  0.28 + Math.abs(tiltX) * 0.010 + Math.abs(tiltY) * 0.010;
+    cardShadow.style.boxShadow =
+      `${sdx.toFixed(1)}px ${sdy.toFixed(1)}px ${blur.toFixed(0)}px rgba(0,0,0,${alph.toFixed(3)})`;
 
     rafId = requestAnimationFrame(animTick);
   }
@@ -142,6 +144,9 @@ function desktopInit(roles) {
   let rafId = requestAnimationFrame(animTick);
 
   // ── CARD FLIP ──────────────────────────────────────────────
+  // Rotates to exactly 90° (card is edge-on, zero width — invisible to the
+  // viewer), swaps the content, then rotates in from -90° to 0°.
+  // The viewer sees a clean 180° arc with no fading and no CSS 3D quirks.
   function rotateTo(idx) {
     if (idx === currentRole || animating) return;
     const prevRole = currentRole;
@@ -150,38 +155,36 @@ function desktopInit(roles) {
 
     updateNav(idx);
 
-    const dir    = idx > prevRole ? 1 : -1;
-    const exitY  =  dir * 28;
-    const enterY = -dir * 28;
+    const dir        = idx > prevRole ? 1 : -1;
+    const newContent = buildCardInner(roles[idx]);
 
-    card3d.style.transition = 'transform 0.2s cubic-bezier(0.4,0,1,1), opacity 0.2s ease-in';
-    card3d.style.transform  = `perspective(600px) rotateY(${exitY}deg) rotate(-1deg)`;
-    card3d.style.opacity    = '0';
+    // Phase 1: rotate out to edge-on (90°)
+    card3d.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 1, 1)';
+    card3d.style.transform  = `perspective(600px) rotateY(${dir * 90}deg) rotate(-1deg)`;
 
     setTimeout(() => {
-      cardFront.innerHTML = buildCardInner(roles[idx]);
+      // Swap content while card is edge-on — invisible to viewer
+      cardFront.innerHTML = newContent;
 
+      // Phase 2: start from the opposite edge (-90°) and rotate in to 0°
       card3d.style.transition = 'none';
-      card3d.style.transform  = `perspective(600px) rotateY(${enterY}deg) rotate(-1deg)`;
-      card3d.style.opacity    = '0';
+      card3d.style.transform  = `perspective(600px) rotateY(${-dir * 90}deg) rotate(-1deg)`;
       void card3d.offsetWidth;
 
-      card3d.style.transition = 'transform 0.28s cubic-bezier(0,0,0.2,1), opacity 0.24s ease-out';
+      card3d.style.transition = 'transform 0.28s cubic-bezier(0, 0, 0.2, 1)';
       card3d.style.transform  = 'perspective(600px) rotateY(0deg) rotate(-2deg)';
-      card3d.style.opacity    = '1';
 
       updateLeft(roles[idx]);
 
       setTimeout(() => {
         swingPhase = Math.PI + Math.PI / 6;
-        tiltX = 0;
-        tiltY = 0;
-        animating = false;
+        tiltX      = 0;
+        tiltY      = 0;
+        animating  = false;
         card3d.style.transition = '';
-        card3d.style.opacity    = '';
         card3d.style.transform  = 'perspective(600px) rotate(-2deg) rotateX(0deg) rotateY(0deg)';
       }, 290);
-    }, 210);
+    }, 200);
   }
 
   // ── SCROLL DETECTION ───────────────────────────────────────
@@ -202,9 +205,10 @@ function desktopInit(roles) {
     cancelAnimationFrame(rafId);
     observer.disconnect();
     nav.remove();
-    rightTrack.innerHTML = '';
+    rightTrack.innerHTML       = '';
     leftPanel.classList.remove('visible');
-    cardFront.innerHTML = '';
+    cardFront.innerHTML        = '';
+    cardShadow.style.boxShadow = '';
     card3d.removeAttribute('style');
   };
 }
