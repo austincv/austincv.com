@@ -1,12 +1,5 @@
 // ─── CARD BUILDER ─────────────────────────────────────────────
 function buildCardInner(role) {
-  const bars = [2,3,1,4,2,3,1,2,4,1,3,2,1,4,2,3,1,2].map(w =>
-    `<span style="width:${w * 2}px"></span>`).join('');
-
-  const logoHtml = role.logo
-    ? `<img src="${role.logo}" alt="${role.company} logo" onerror="this.parentElement.innerHTML='${role.icon}'">`
-    : role.icon;
-
   return `
     <div class="card-inner" style="--accent:${role.accent}">
       <div class="card-top-stripe"></div>
@@ -17,11 +10,7 @@ function buildCardInner(role) {
       <div class="card-name">Austin<br>Chungath Vincent</div>
       <div class="card-title">${role.title}</div>
       <div class="card-divider"></div>
-      <div class="card-company-row">
-        <div class="card-company-icon">${logoHtml}</div>
-        <div class="card-company-name">${role.company}</div>
-      </div>
-      <div class="card-barcode">${bars}</div>
+      <img class="card-logo-horizontal" src="${role.logoHorizontal}" alt="${role.company} logo">
       <div class="card-dates">${role.dates}</div>
     </div>`;
 }
