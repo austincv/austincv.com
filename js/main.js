@@ -68,10 +68,10 @@ function desktopInit(roles) {
   const nav = document.createElement('nav');
   nav.className = 'scroll-nav';
   nav.setAttribute('aria-label', 'Jump to role');
-  roles.forEach((role, i) => {
+  roles.forEach((_, i) => {
     const item = document.createElement('div');
     item.className = 'scroll-nav-item';
-    item.innerHTML = `<span class="scroll-nav-year">${extractYears(role.dates)}</span><span class="scroll-nav-dot"></span>`;
+    item.innerHTML = `<span class="scroll-nav-dot"></span>`;
     item.addEventListener('click', () => sections[i].scrollIntoView({ behavior: 'smooth' }), { signal });
     nav.appendChild(item);
   });
@@ -126,8 +126,9 @@ function desktopInit(roles) {
       tiltX += (targetTX - tiltX) * 0.09;
       tiltY += (targetTY - tiltY) * 0.09;
 
-      card3d.style.transform =
-        `perspective(600px) rotate(${swingDeg}deg) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+      const t = `perspective(600px) rotate(${swingDeg}deg) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+      card3d.style.transform     = t;
+      cardShadow.style.transform = t;
     }
 
     // Shadow always updates — no blink during flip
@@ -159,20 +160,28 @@ function desktopInit(roles) {
     const newContent = buildCardInner(roles[idx]);
 
     // Phase 1: rotate out to edge-on (90°)
-    card3d.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 1, 1)';
-    card3d.style.transform  = `perspective(600px) rotateY(${dir * 90}deg) rotate(-1deg)`;
+    const edgeOut = `perspective(600px) rotateY(${dir * 90}deg) rotate(-1deg)`;
+    card3d.style.transition     = 'transform 0.2s cubic-bezier(0.4, 0, 1, 1)';
+    card3d.style.transform      = edgeOut;
+    cardShadow.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 1, 1)';
+    cardShadow.style.transform  = edgeOut;
 
     setTimeout(() => {
       // Swap content while card is edge-on — invisible to viewer
       cardFront.innerHTML = newContent;
 
       // Phase 2: start from the opposite edge (-90°) and rotate in to 0°
-      card3d.style.transition = 'none';
-      card3d.style.transform  = `perspective(600px) rotateY(${-dir * 90}deg) rotate(-1deg)`;
+      const edgeIn = `perspective(600px) rotateY(${-dir * 90}deg) rotate(-1deg)`;
+      card3d.style.transition     = 'none';
+      card3d.style.transform      = edgeIn;
+      cardShadow.style.transition = 'none';
+      cardShadow.style.transform  = edgeIn;
       void card3d.offsetWidth;
 
-      card3d.style.transition = 'transform 0.28s cubic-bezier(0, 0, 0.2, 1)';
-      card3d.style.transform  = 'perspective(600px) rotateY(0deg) rotate(-2deg)';
+      card3d.style.transition     = 'transform 0.28s cubic-bezier(0, 0, 0.2, 1)';
+      card3d.style.transform      = 'perspective(600px) rotateY(0deg) rotate(-2deg)';
+      cardShadow.style.transition = 'transform 0.28s cubic-bezier(0, 0, 0.2, 1)';
+      cardShadow.style.transform  = 'perspective(600px) rotateY(0deg) rotate(-2deg)';
 
       updateLeft(roles[idx]);
 
@@ -181,8 +190,11 @@ function desktopInit(roles) {
         tiltX      = 0;
         tiltY      = 0;
         animating  = false;
-        card3d.style.transition = '';
-        card3d.style.transform  = 'perspective(600px) rotate(-2deg) rotateX(0deg) rotateY(0deg)';
+        const rest = 'perspective(600px) rotate(-2deg) rotateX(0deg) rotateY(0deg)';
+        card3d.style.transition     = '';
+        card3d.style.transform      = rest;
+        cardShadow.style.transition = '';
+        cardShadow.style.transform  = rest;
       }, 290);
     }, 200);
   }
@@ -208,7 +220,7 @@ function desktopInit(roles) {
     rightTrack.innerHTML       = '';
     leftPanel.classList.remove('visible');
     cardFront.innerHTML        = '';
-    cardShadow.style.boxShadow = '';
+    cardShadow.removeAttribute('style');
     card3d.removeAttribute('style');
   };
 }
