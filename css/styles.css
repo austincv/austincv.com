@@ -353,14 +353,16 @@ body {
     min-height: 0;
   }
 
-  /* Each card is individually positioned — JS sets translateX per card */
+  /* Each card is individually positioned — JS sets translateX per card.
+     Card is always rendered at the exact desktop dimensions (260×412px);
+     JS injects scale() into every transform to fit the available space,
+     guaranteeing pixel-identical proportions to the desktop card. */
   .mobile-card {
     position: absolute;
     top: 50%;
     left: 50%;
-    /* translateX(calc(-50% + Npx)) translateY(-50%) set entirely by JS */
-    height: min(var(--card-h), 56dvh); /* ISO/IEC 7810 ID-1 height, capped for small screens */
-    aspect-ratio: 53.98 / 85.60;       /* exact credit-card ratio — width derived from height */
+    width: var(--card-w);
+    height: var(--card-h);
     border-radius: 15px;
     background: #fff;
     overflow: hidden;
@@ -415,34 +417,7 @@ body {
   .mobile-headline {
     font-size: 38px;
   }
-  .card-inner {
-    padding: 20px 16px 12px;
-  }
-  .card-label {
-    margin-bottom: 10px;
-  }
-  .card-photo,
-  .card-photo-placeholder {
-    width: 96px;
-    height: 96px;
-    margin-bottom: 12px;
-  }
-  .card-name {
-    font-size: 15px;
-    margin-bottom: 4px;
-  }
-  .card-title {
-    margin-bottom: 12px;
-  }
-  .card-divider {
-    margin-bottom: 12px;
-  }
-  .card-logo-horizontal {
-    max-height: 48px;
-  }
-  .card-dates {
-    margin-top: 4px;
-  }
+  /* Card interior proportions are preserved by JS scale() — no overrides needed */
 }
 
 /* ─── HOVER (pointer devices only) ───────────────────────── */

@@ -227,6 +227,17 @@ function mobileInit(roles) {
   let touchNX = 0.5, touchNY = 0.5;
   let rafId;
 
+  // ── SCALE ────────────────────────────────────────────────────
+  // Card is always 260×412px (identical to desktop). Scale it down to fit
+  // the available swipe area so proportions are pixel-identical to desktop.
+  const CARD_W = 260, CARD_H = 412;
+  const cardScale = Math.min(
+    1,
+    (swipeArea.offsetHeight * 0.90) / CARD_H,
+    (swipeArea.offsetWidth  * 0.88) / CARD_W
+  );
+  const sc = `scale(${cardScale.toFixed(4)})`;
+
   // ── BUILD ────────────────────────────────────────────────────
   const card = document.createElement('div');
   card.className = 'mobile-card';
@@ -269,7 +280,7 @@ function mobileInit(roles) {
 
     // Phase 1: rotate out to edge-on
     card.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 1, 1)';
-    card.style.transform  = `translateX(calc(-50%)) translateY(-50%) perspective(600px) rotateY(${dir * 90}deg) rotate(-1deg)`;
+    card.style.transform  = `translateX(calc(-50%)) translateY(-50%) ${sc} perspective(600px) rotateY(${dir * 90}deg) rotate(-1deg)`;
 
     setTimeout(() => {
       // Swap content while edge-on — invisible to viewer
@@ -277,11 +288,11 @@ function mobileInit(roles) {
 
       // Snap to opposite edge then rotate in
       card.style.transition = 'none';
-      card.style.transform  = `translateX(calc(-50%)) translateY(-50%) perspective(600px) rotateY(${-dir * 90}deg) rotate(-1deg)`;
+      card.style.transform  = `translateX(calc(-50%)) translateY(-50%) ${sc} perspective(600px) rotateY(${-dir * 90}deg) rotate(-1deg)`;
       void card.offsetWidth;
 
       card.style.transition = 'transform 0.28s cubic-bezier(0, 0, 0.2, 1)';
-      card.style.transform  = `translateX(calc(-50%)) translateY(-50%) perspective(600px) rotateY(0deg) rotate(-2deg)`;
+      card.style.transform  = `translateX(calc(-50%)) translateY(-50%) ${sc} perspective(600px) rotateY(0deg) rotate(-2deg)`;
 
       updateMeta(true);
 
@@ -291,7 +302,7 @@ function mobileInit(roles) {
         tiltY      = 0;
         animating  = false;
         card.style.transition = '';
-        card.style.transform  = `translateX(calc(-50%)) translateY(-50%) perspective(600px) rotate(-2deg) rotateX(0deg) rotateY(0deg)`;
+        card.style.transform  = `translateX(calc(-50%)) translateY(-50%) ${sc} perspective(600px) rotate(-2deg) rotateX(0deg) rotateY(0deg)`;
       }, 290);
     }, 200);
   }
@@ -308,7 +319,7 @@ function mobileInit(roles) {
       tiltY += (targetTY - tiltY) * 0.09;
 
       card.style.transition = 'none';
-      card.style.transform  = `translateX(calc(-50%)) translateY(-50%) perspective(600px) rotate(${swingDeg.toFixed(2)}deg) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg)`;
+      card.style.transform  = `translateX(calc(-50%)) translateY(-50%) ${sc} perspective(600px) rotate(${swingDeg.toFixed(2)}deg) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg)`;
     }
 
     rafId = requestAnimationFrame(animTick);
