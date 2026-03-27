@@ -11,7 +11,6 @@
   --black: #0d0d0d;
   --white: #fafaf8;
   --grey: #888;
-  --light: #e8e8e4;
   --card-w: 260px;
   --card-h: 412px; /* ISO/IEC 7810 ID-1 portrait: 85.60×53.98 mm → 260×412 px */
 }
@@ -110,10 +109,12 @@ body {
   width: 58vw;
 }
 
-/* Sticky card stage */
+/* Fixed card stage */
 .card-stage {
-  position: sticky;
+  position: fixed;
   top: 0;
+  right: 0;
+  width: 58vw;
   height: 100vh;
   display: flex;
   align-items: center;
@@ -277,15 +278,6 @@ body {
   justify-content: flex-end;
 }
 
-.scroll-nav-year {
-  font-size: 10px;
-  letter-spacing: .06em;
-  color: #ccc;
-  transition: color .35s, font-weight .35s;
-  text-align: right;
-  white-space: nowrap;
-}
-
 .scroll-nav-dot {
   width: 6px;
   height: 6px;
@@ -294,11 +286,6 @@ body {
   background: transparent;
   flex-shrink: 0;
   transition: background .35s, border-color .35s, transform .35s;
-}
-
-.scroll-nav-item.active .scroll-nav-year {
-  color: var(--nav-accent, #0d0d0d);
-  font-weight: 500;
 }
 
 .scroll-nav-item.active .scroll-nav-dot {
@@ -315,8 +302,8 @@ body {
   .mobile {
     display: flex;
     flex-direction: column;
-    height: 100dvh;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
   }
 

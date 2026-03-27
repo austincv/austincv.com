@@ -15,23 +15,6 @@ function buildCardInner(role) {
     </div>`;
 }
 
-// ─── HELPERS ──────────────────────────────────────────────────
-function extractYears(dates) {
-  const years = dates.match(/\d{4}/g);
-  if (!years) return dates;
-  return years.length >= 2 && years[0] !== years[years.length - 1]
-    ? years[0] + '–' + years[years.length - 1]
-    : years[0];
-}
-
-function formatDateRange(dates) {
-  const years = dates.match(/\d{4}/g) || [];
-  if (/present/i.test(dates)) return years[0] + ' – Present';
-  if (years.length >= 2 && years[0] !== years[years.length - 1])
-    return years[0] + ' – ' + years[years.length - 1];
-  return years[0] || dates;
-}
-
 // ─── DESKTOP ──────────────────────────────────────────────────
 function desktopInit(roles) {
   const ac       = new AbortController();
