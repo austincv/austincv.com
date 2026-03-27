@@ -336,7 +336,8 @@ body {
   .mobile-swipe-area {
     flex: 1;
     position: relative;
-    overflow: hidden;
+    overflow-x: clip; /* hides off-screen cards without clipping the vertical shadow */
+    overflow-y: visible;
     min-height: 0;
     cursor: grab;
   }
