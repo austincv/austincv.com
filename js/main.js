@@ -221,10 +221,6 @@ function mobileInit(roles) {
 
   const swipeArea = document.getElementById('mobileSwipeArea');
   const progress  = document.getElementById('mobileProgress');
-  const eyebrow   = document.getElementById('mobileEyebrow');
-  const desc      = document.getElementById('mobileDesc');
-  const btnPrev   = document.getElementById('mPrev');
-  const btnNext   = document.getElementById('mNext');
 
   const total = roles.length;
   let current = 0;
@@ -259,8 +255,6 @@ function mobileInit(roles) {
     progress.querySelectorAll('.mobile-progress-dot').forEach((d, i) => {
       d.classList.toggle('active', i === current);
     });
-    eyebrow.textContent = roles[current].company + ' · ' + roles[current].dates;
-    desc.textContent    = roles[current].sub;
   }
 
   // ── NAVIGATION ───────────────────────────────────────────────
@@ -334,10 +328,6 @@ function mobileInit(roles) {
   window.addEventListener('mousemove',    e => onMove(e.clientX),  { signal });
   window.addEventListener('mouseup',      () => onEnd(),           { signal });
 
-  // Buttons
-  btnPrev.addEventListener('click', () => goTo(current - 1), { signal });
-  btnNext.addEventListener('click', () => goTo(current + 1), { signal });
-
   // ── INIT ─────────────────────────────────────────────────────
   requestAnimationFrame(() => {
     slotW = swipeArea.offsetWidth;
@@ -357,8 +347,6 @@ function mobileInit(roles) {
     ro.disconnect();
     swipeArea.innerHTML = '';
     progress.innerHTML  = '';
-    eyebrow.textContent = '';
-    desc.textContent    = '';
   };
 }
 
