@@ -362,6 +362,7 @@ body {
     will-change: transform;
     user-select: none;
     -webkit-user-drag: none;
+    zoom: 1.2;
   }
 
   .mobile-footer {
