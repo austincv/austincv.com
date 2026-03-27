@@ -93,7 +93,7 @@ body {
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  border: 1.5px solid color-mix(in srgb, var(--current-accent, #888) 30%, transparent);
+  border: none;
   border-radius: 15px;
   font-size: 12px;
   letter-spacing: .02em;
@@ -373,7 +373,7 @@ body {
 
   .mobile-progress {
     position: absolute;
-    top: 14px;
+    top: 1.5dvh;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -383,15 +383,14 @@ body {
   .mobile-progress-dot {
     width: 6px; height: 6px;
     border-radius: 50%;
-    border: 1.5px solid #ccc;
+    border: 1px solid #d0d0d0;
     background: transparent;
     flex-shrink: 0;
-    transition: background .35s, border-color .35s, transform .35s;
+    transition: background .35s, border-color .35s;
   }
   .mobile-progress-dot.active {
-    background: var(--current-accent, var(--black));
-    border-color: var(--current-accent, var(--black));
-    transform: scale(1.4);
+    background: #d0d0d0;
+    border-color: #d0d0d0;
   }
 
   .mobile-linkedin-btn {
@@ -401,6 +400,7 @@ body {
     padding-bottom: 16px;
     font-size: 16px;
     white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
   }
 
 
