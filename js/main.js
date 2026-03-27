@@ -214,138 +214,161 @@ function mobileInit(roles) {
 
   const swipeArea      = document.getElementById('mobileSwipeArea');
   const progress       = document.getElementById('mobileProgress');
+  const mobileHeader   = document.getElementById('mobileHeader');
   const mobileEyebrow  = document.getElementById('mobileEyebrow');
   const mobileHeadline = document.getElementById('mobileHeadline');
 
-  let current = 0;
-  let slotW   = 0;
+  const total = roles.length;
+  let current  = 0;
+  let animating = false;
+
+  let swingPhase = 0;
+  let tiltX = 0, tiltY = 0;
+  let touchNX = 0.5, touchNY = 0.5;
+  let rafId;
 
   // ── BUILD ────────────────────────────────────────────────────
-  const cards = roles.map(role => {
-    const el = document.createElement('div');
-    el.className = 'mobile-card';
-    el.innerHTML = buildCardInner(role);
-    swipeArea.appendChild(el);
-    return el;
-  });
+  const card = document.createElement('div');
+  card.className = 'mobile-card';
+  card.innerHTML = buildCardInner(roles[0]);
+  swipeArea.appendChild(card);
 
-  const total = roles.length;
-
-  cards.forEach(() => {
+  roles.forEach(() => {
     const dot = document.createElement('div');
     dot.className = 'mobile-progress-dot';
     progress.appendChild(dot);
   });
 
-  // ── POSITION ────────────────────────────────────────────────
-  function placeCards(dragOffset, transition) {
-    cards.forEach((card, i) => {
-      const x = (i - current) * slotW + dragOffset;
-      card.style.transition = transition;
-      card.style.transform  = `translateX(calc(-50% + ${x.toFixed(1)}px)) translateY(-50%)`;
-    });
-  }
-
   // ── META ─────────────────────────────────────────────────────
-  function updateMeta() {
+  function updateMeta(animate) {
     progress.querySelectorAll('.mobile-progress-dot').forEach((d, i) => {
       d.classList.toggle('active', i === current);
     });
-    mobileEyebrow.textContent  = roles[current].eyebrow;
-    mobileHeadline.textContent = roles[current].headline.replace(/\n/g, ' ');
     document.documentElement.style.setProperty('--current-accent', roles[current].accent);
-  }
 
-  // ── NAVIGATION ───────────────────────────────────────────────
-  function goTo(idx) {
-    current = Math.max(0, Math.min(total - 1, idx));
-    placeCards(0, 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)');
-    updateMeta();
-  }
-
-  // ── DRAG ─────────────────────────────────────────────────────
-  let dragging = false;
-  let startX   = 0;
-  let offsetX  = 0;
-  let lastX    = 0, lastT = 0, flickVel = 0;
-
-  function resistEnd(raw) {
-    if (current === 0         && raw > 0) return raw * 0.18;
-    if (current === total - 1 && raw < 0) return raw * 0.18;
-    return raw;
-  }
-
-  function onStart(x) {
-    dragging = true;
-    startX   = x;
-    offsetX  = 0;
-    flickVel = 0;
-    lastX    = x;
-    lastT    = performance.now();
-    swipeArea.classList.add('dragging');
-    placeCards(0, 'none');
-  }
-
-  function onMove(x) {
-    if (!dragging) return;
-    offsetX = resistEnd(x - startX);
-    placeCards(offsetX, 'none');
-    const now = performance.now();
-    const dt  = now - lastT;
-    if (dt > 0) flickVel = ((x - lastX) / dt) * 16;
-    lastX = x;
-    lastT = now;
-  }
-
-  function onEnd() {
-    if (!dragging) return;
-    dragging = false;
-    swipeArea.classList.remove('dragging');
-
-    const atEnd = (current === 0 && offsetX > 0) ||
-                  (current === total - 1 && offsetX < 0);
-
-    if (atEnd) {
-      placeCards(0, 'transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1)');
-    } else if (Math.abs(flickVel) > 3) {
-      goTo(current + (flickVel < 0 ? 1 : -1));
-    } else if (Math.abs(offsetX) > slotW * 0.25) {
-      goTo(current + (offsetX < 0 ? 1 : -1));
+    if (animate) {
+      mobileHeader.classList.remove('visible');
+      setTimeout(() => {
+        mobileEyebrow.textContent  = roles[current].eyebrow;
+        mobileHeadline.textContent = roles[current].headline.replace(/\n/g, ' ');
+        mobileHeader.classList.add('visible');
+      }, 280);
     } else {
-      placeCards(0, 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)');
+      mobileEyebrow.textContent  = roles[current].eyebrow;
+      mobileHeadline.textContent = roles[current].headline.replace(/\n/g, ' ');
     }
   }
 
-  // Touch
-  swipeArea.addEventListener('touchstart',  e => onStart(e.touches[0].clientX), { passive: true, signal });
-  swipeArea.addEventListener('touchmove',   e => onMove(e.touches[0].clientX),  { passive: true, signal });
-  swipeArea.addEventListener('touchend',    () => onEnd(), { signal });
-  swipeArea.addEventListener('touchcancel', () => onEnd(), { signal });
+  // ── FLIP ─────────────────────────────────────────────────────
+  function flipTo(idx) {
+    idx = Math.max(0, Math.min(total - 1, idx));
+    if (idx === current || animating) return;
+    const dir = idx > current ? -1 : 1;
+    animating = true;
+    current   = idx;
+
+    // Phase 1: rotate out to edge-on
+    card.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 1, 1)';
+    card.style.transform  = `translateX(calc(-50%)) translateY(-50%) perspective(600px) rotateY(${dir * 90}deg) rotate(-1deg)`;
+
+    setTimeout(() => {
+      // Swap content while edge-on — invisible to viewer
+      card.innerHTML = buildCardInner(roles[idx]);
+
+      // Snap to opposite edge then rotate in
+      card.style.transition = 'none';
+      card.style.transform  = `translateX(calc(-50%)) translateY(-50%) perspective(600px) rotateY(${-dir * 90}deg) rotate(-1deg)`;
+      void card.offsetWidth;
+
+      card.style.transition = 'transform 0.28s cubic-bezier(0, 0, 0.2, 1)';
+      card.style.transform  = `translateX(calc(-50%)) translateY(-50%) perspective(600px) rotateY(0deg) rotate(-2deg)`;
+
+      updateMeta(true);
+
+      setTimeout(() => {
+        swingPhase = Math.PI + Math.PI / 6;
+        tiltX      = 0;
+        tiltY      = 0;
+        animating  = false;
+        card.style.transition = '';
+        card.style.transform  = `translateX(calc(-50%)) translateY(-50%) perspective(600px) rotate(-2deg) rotateX(0deg) rotateY(0deg)`;
+      }, 290);
+    }, 200);
+  }
+
+  // ── SWING + TILT ─────────────────────────────────────────────
+  function animTick() {
+    swingPhase += 0.007;
+    const swingDeg = Math.sin(swingPhase) * 2 - 1;
+
+    if (!animating) {
+      const targetTY =  (touchNX * 2 - 1) * 18;
+      const targetTX = -(touchNY * 2 - 1) * 12;
+      tiltX += (targetTX - tiltX) * 0.09;
+      tiltY += (targetTY - tiltY) * 0.09;
+
+      card.style.transition = 'none';
+      card.style.transform  = `translateX(calc(-50%)) translateY(-50%) perspective(600px) rotate(${swingDeg.toFixed(2)}deg) rotateX(${tiltX.toFixed(2)}deg) rotateY(${tiltY.toFixed(2)}deg)`;
+    }
+
+    rafId = requestAnimationFrame(animTick);
+  }
+
+  // ── GESTURE DETECTION ────────────────────────────────────────
+  let startX = 0, startY = 0;
+
+  swipeArea.addEventListener('touchstart', e => {
+    startX  = e.touches[0].clientX;
+    startY  = e.touches[0].clientY;
+    touchNX = startX / window.innerWidth;
+    touchNY = startY / window.innerHeight;
+  }, { passive: true, signal });
+
+  swipeArea.addEventListener('touchmove', e => {
+    touchNX = e.touches[0].clientX / window.innerWidth;
+    touchNY = e.touches[0].clientY / window.innerHeight;
+  }, { passive: true, signal });
+
+  swipeArea.addEventListener('touchend', e => {
+    touchNX = 0.5; touchNY = 0.5;
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
+      flipTo(current + (dx < 0 ? 1 : -1));
+    } else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+      // Tap — left half = prev, right half = next
+      const mid = swipeArea.getBoundingClientRect().left + swipeArea.offsetWidth / 2;
+      flipTo(current + (startX < mid ? -1 : 1));
+    }
+  }, { signal });
+
+  swipeArea.addEventListener('touchcancel', () => { touchNX = 0.5; touchNY = 0.5; }, { signal });
 
   // Mouse (for desktop testing)
-  swipeArea.addEventListener('mousedown', e => { onStart(e.clientX); e.preventDefault(); }, { signal });
-  window.addEventListener('mousemove',    e => onMove(e.clientX),  { signal });
-  window.addEventListener('mouseup',      () => onEnd(),           { signal });
+  let mouseStartX = 0;
+  swipeArea.addEventListener('mousedown', e => { mouseStartX = e.clientX; e.preventDefault(); }, { signal });
+  swipeArea.addEventListener('click', e => {
+    const dx = e.clientX - mouseStartX;
+    if (Math.abs(dx) > 30) {
+      flipTo(current + (dx < 0 ? 1 : -1));
+    } else {
+      const mid = swipeArea.getBoundingClientRect().left + swipeArea.offsetWidth / 2;
+      flipTo(current + (e.clientX < mid ? -1 : 1));
+    }
+  }, { signal });
 
   // ── INIT ─────────────────────────────────────────────────────
-  requestAnimationFrame(() => {
-    slotW = swipeArea.offsetWidth;
-    placeCards(0, 'none');
-    updateMeta();
-  });
-
-  const ro = new ResizeObserver(() => {
-    slotW = swipeArea.offsetWidth;
-    placeCards(0, 'none');
-  });
-  ro.observe(swipeArea);
+  updateMeta(false);
+  setTimeout(() => mobileHeader.classList.add('visible'), 200);
+  rafId = requestAnimationFrame(animTick);
 
   // ── DESTROY ──────────────────────────────────────────────────
   return function destroy() {
     ac.abort();
-    ro.disconnect();
+    cancelAnimationFrame(rafId);
     swipeArea.innerHTML        = '';
     progress.innerHTML         = '';
+    mobileHeader.classList.remove('visible');
     mobileEyebrow.textContent  = '';
     mobileHeadline.textContent = '';
   };

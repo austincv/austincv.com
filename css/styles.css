@@ -323,6 +323,9 @@ body {
     letter-spacing: .18em;
     text-transform: uppercase;
     color: var(--grey);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .5s, transform .5s;
   }
 
   .mobile-headline {
@@ -335,17 +338,20 @@ body {
     line-height: 1.08;
     letter-spacing: -.02em;
     text-align: center;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity .5s .06s, transform .5s .06s;
   }
+
+  .mobile-header.visible .mobile-eyebrow,
+  .mobile-header.visible .mobile-headline { opacity: 1; transform: none; }
 
   .mobile-swipe-area {
     flex: 1;
     position: relative;
-    overflow-x: clip; /* hides off-screen cards without clipping the vertical shadow */
-    overflow-y: visible;
+    overflow: visible;
     min-height: 0;
-    cursor: grab;
   }
-  .mobile-swipe-area.dragging { cursor: grabbing; }
 
   /* Each card is individually positioned — JS sets translateX per card */
   .mobile-card {
