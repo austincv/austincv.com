@@ -362,7 +362,7 @@ body {
 
   .mobile-footer {
     flex-shrink: 0;
-    height: 20dvh;
+    height: 10dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -393,15 +393,6 @@ body {
     border-color: #d0d0d0;
   }
 
-  .mobile-linkedin-btn {
-    width: calc(min(var(--card-h), 48dvh) * 53.98 / 85.60 * 0.8);
-    justify-content: center;
-    padding-top: 16px;
-    padding-bottom: 16px;
-    font-size: 16px;
-    white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(0,0,0,.08);
-  }
 
 
 }

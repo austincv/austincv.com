@@ -217,7 +217,6 @@ function mobileInit(roles) {
   const mobileEyebrow  = document.getElementById('mobileEyebrow');
   const mobileHeadline = document.getElementById('mobileHeadline');
 
-  const total = roles.length;
   let current = 0;
   let slotW   = 0;
 
@@ -230,7 +229,9 @@ function mobileInit(roles) {
     return el;
   });
 
-  roles.forEach(() => {
+  const total = roles.length;
+
+  cards.forEach(() => {
     const dot = document.createElement('div');
     dot.className = 'mobile-progress-dot';
     progress.appendChild(dot);
