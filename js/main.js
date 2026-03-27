@@ -24,6 +24,14 @@ function extractYears(dates) {
     : years[0];
 }
 
+function formatDateRange(dates) {
+  const years = dates.match(/\d{4}/g) || [];
+  if (/present/i.test(dates)) return years[0] + ' – Present';
+  if (years.length >= 2 && years[0] !== years[years.length - 1])
+    return years[0] + ' – ' + years[years.length - 1];
+  return years[0] || dates;
+}
+
 // ─── DESKTOP ──────────────────────────────────────────────────
 function desktopInit(roles) {
   const ac       = new AbortController();
@@ -78,6 +86,7 @@ function desktopInit(roles) {
   lpEyebrow.textContent  = roles[0].eyebrow;
   lpHeadline.innerHTML   = roles[0].headline.replace(/\n/g, '<br>');
   lpSub.textContent      = roles[0].sub;
+  document.documentElement.style.setProperty('--current-accent', roles[0].accent);
   updateNav(0);
 
   setTimeout(() => leftPanel.classList.add('visible'), 200);
@@ -88,6 +97,7 @@ function desktopInit(roles) {
       lpEyebrow.textContent = role.eyebrow;
       lpHeadline.innerHTML  = role.headline.replace(/\n/g, '<br>');
       lpSub.textContent     = role.sub;
+      document.documentElement.style.setProperty('--current-accent', role.accent);
       leftPanel.classList.add('visible');
     }, 280);
   }
@@ -219,8 +229,10 @@ function mobileInit(roles) {
   const ac       = new AbortController();
   const { signal } = ac;
 
-  const swipeArea = document.getElementById('mobileSwipeArea');
-  const progress  = document.getElementById('mobileProgress');
+  const swipeArea      = document.getElementById('mobileSwipeArea');
+  const progress       = document.getElementById('mobileProgress');
+  const mobileEyebrow  = document.getElementById('mobileEyebrow');
+  const mobileHeadline = document.getElementById('mobileHeadline');
 
   const total = roles.length;
   let current = 0;
@@ -255,6 +267,9 @@ function mobileInit(roles) {
     progress.querySelectorAll('.mobile-progress-dot').forEach((d, i) => {
       d.classList.toggle('active', i === current);
     });
+    mobileEyebrow.textContent  = roles[current].eyebrow;
+    mobileHeadline.textContent = roles[current].headline.replace(/\n/g, ' ');
+    document.documentElement.style.setProperty('--current-accent', roles[current].accent);
   }
 
   // ── NAVIGATION ───────────────────────────────────────────────
@@ -345,8 +360,10 @@ function mobileInit(roles) {
   return function destroy() {
     ac.abort();
     ro.disconnect();
-    swipeArea.innerHTML = '';
-    progress.innerHTML  = '';
+    swipeArea.innerHTML        = '';
+    progress.innerHTML         = '';
+    mobileEyebrow.textContent  = '';
+    mobileHeadline.textContent = '';
   };
 }
 

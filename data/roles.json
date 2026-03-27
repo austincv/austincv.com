@@ -22,7 +22,7 @@
     "icon": "D",
     "headline": "Scaling the\ndata platform.",
     "eyebrow": "Data Engineering · Payments",
-    "sub": "Spent four years ensuring data was a competitive advantage by building a state-of-the-art analytics platform for data teams at DOJO.",
+    "sub": "Spent four years ensuring data was a competitive advantage by building a state-of-the-art analytics platform for data teams.",
     "headshot": "assets/headshots/default.png",
     "logo": "assets/logos/dojo.png",
     "logoHorizontal": "assets/logos/horizontal/dojo.png"
@@ -35,8 +35,8 @@
     "accent": "#1e4d2b",
     "icon": "H",
     "headline": "Shaping the\nfuture of AgTech.",
-    "eyebrow": "AI for Agriculture . Drones . Satellite",
-    "sub": "As a founding engineer, I built the MLOps infrastructure and core libraries to transform raw satellite and drone imagery into field-level insights.",
+    "eyebrow": "AI for Agriculture · Drones · Satellite",
+    "sub": "As a founding engineer, I built the MLOps infrastructure and core libraries to transform raw drone imagery into field-level insights.",
     "headshot": "assets/headshots/default.png",
     "logo": "assets/logos/hummingbird.png",
     "logoHorizontal": "assets/logos/horizontal/hummingbird.png"
