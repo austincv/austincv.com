@@ -310,27 +310,31 @@ body {
   .mobile-header {
     flex-shrink: 0;
     height: 25dvh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 0 50px;
-    text-align: center;
+    position: relative;
   }
 
   .mobile-eyebrow {
+    position: absolute;
+    top: 5dvh;
+    left: 0;
+    right: 0;
+    text-align: center;
     font-size: 10px;
     letter-spacing: .18em;
     text-transform: uppercase;
     color: var(--grey);
-    margin-bottom: 12px;
   }
 
   .mobile-headline {
+    position: absolute;
+    top: 9dvh;
+    left: 50px;
+    right: 50px;
     font-family: 'Instrument Serif', serif;
     font-size: 51.2px;
     line-height: 1.08;
     letter-spacing: -.02em;
+    text-align: center;
   }
 
   .mobile-swipe-area {
