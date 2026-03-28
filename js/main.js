@@ -282,7 +282,11 @@ function mobileInit(roles) {
     animating = true;
     current   = idx;
 
-    const rot = (deg) => axis === 'X' ? `rotateX(${deg}deg)` : `rotateY(${deg}deg)`;
+    // For rotateY: dir=-1 (next) exits right-edge-forward → card goes left  ✓
+    // For rotateX: dir=-1 (next) must exit top-edge-away  → card goes up   ✓
+    //   rotateX physics are mirror-flipped vs rotateY, so negate the angle.
+    const rot     = (deg) => axis === 'X' ? `rotateX(${-deg}deg)` : `rotateY(${deg}deg)`;
+    const rotZero = axis === 'X' ? 'rotateX(0deg)' : 'rotateY(0deg)';
 
     // Phase 1: rotate out to edge-on
     card.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 1, 1)';
@@ -292,13 +296,16 @@ function mobileInit(roles) {
       // Swap content while edge-on — invisible to viewer
       card.innerHTML = buildCardInner(roles[idx]);
 
-      // Snap to opposite edge then rotate in
+      // Snap to opposite edge then rotate in.
+      // Keep the same function list (perspective · rotX/Y · rotateZ) so the
+      // browser interpolates per-function rather than decomposing matrices —
+      // matrix decomposition can produce a visible wobble mid-transition.
       card.style.transition = 'none';
       card.style.transform  = `translateX(calc(-50%)) translateY(-50%) ${sc} perspective(600px) ${rot(-dir * 90)} rotate(-1deg)`;
       void card.offsetWidth;
 
       card.style.transition = 'transform 0.28s cubic-bezier(0, 0, 0.2, 1)';
-      card.style.transform  = `translateX(calc(-50%)) translateY(-50%) ${sc} perspective(600px) rotate(-2deg)`;
+      card.style.transform  = `translateX(calc(-50%)) translateY(-50%) ${sc} perspective(600px) ${rotZero} rotate(-2deg)`;
 
       updateMeta(true);
 
