@@ -312,11 +312,21 @@ function mobileInit(roles) {
   }
 
   // ── SWING + TILT ─────────────────────────────────────────────
+  let _lastH = 0, _lastW = 0;
+
   function animTick() {
-    // Self-correct if scale was 0 at init time (iOS Safari layout timing)
-    if (cardScale === 0 && swipeArea.offsetHeight > 0) {
-      cardScale = computeScale();
-      sc = `scale(${cardScale.toFixed(4)})`;
+    // Re-derive scale whenever layout dimensions change (handles iOS Safari
+    // orientation-change timing: the mq `change` event fires before the
+    // viewport has fully settled, so the first measurement can be wrong).
+    if (!animating) {
+      const h = swipeArea.offsetHeight, w = swipeArea.offsetWidth;
+      if (h !== _lastH || w !== _lastW) {
+        _lastH = h; _lastW = w;
+        if (h > 0 && w > 0) {
+          cardScale = computeScale();
+          sc = `scale(${cardScale.toFixed(4)})`;
+        }
+      }
     }
 
     swingPhase += 0.007;
