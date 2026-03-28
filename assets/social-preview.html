@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black:  #0d0d0d;
+    --white:  #fafaf8;
+    --grey:   #888;
+    --light:  #e8e8e4;
+    --accent: #0d2358;
+  }
+
+  html, body {
+    width: 1200px;
+    height: 630px;
+    overflow: hidden;
+    background: var(--white);
+    color: var(--black);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .card {
+    width: 1200px;
+    height: 630px;
+    display: flex;
+    align-items: center;
+    padding: 0 80px;
+    gap: 60px;
+    position: relative;
+  }
+
+  /* Left accent bar */
+  .card::before {
+    content: '';
+    position: absolute;
+    left: 52px;
+    top: 72px;
+    bottom: 72px;
+    width: 5px;
+    background: var(--accent);
+    border-radius: 3px;
+  }
+
+  /* Text block */
+  .text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 18px;
+  }
+
+  .name {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-size: 68px;
+    line-height: 1.05;
+    color: var(--black);
+    margin-bottom: 28px;
+  }
+
+  .divider {
+    width: 100%;
+    height: 1.5px;
+    background: var(--light);
+    margin-bottom: 24px;
+  }
+
+  .sub {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    font-size: 22px;
+    line-height: 1.55;
+    color: var(--grey);
+    max-width: 520px;
+    margin-bottom: 40px;
+  }
+
+  .url {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    font-size: 18px;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+
+  /* Photo */
+  .photo-wrap {
+    flex-shrink: 0;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: linear-gradient(160deg, rgba(255,255,255,0.85) 0%, var(--accent) 100%);
+    padding: 4px;
+    box-shadow: 0 8px 40px rgba(13, 35, 88, 0.18);
+  }
+
+  .photo-wrap img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="text">
+      <p class="eyebrow">Data Platform Architect</p>
+      <h1 class="name">Austin<br>Chungath Vincent</h1>
+      <div class="divider"></div>
+      <p class="sub">A decade of scaling data platforms across Fintech, RegTech, Energy, and AI.</p>
+      <span class="url">austincv.com</span>
+    </div>
+    <div class="photo-wrap">
+      <img src="../assets/headshots/default.png" alt="Austin Chungath Vincent">
+    </div>
+  </div>
+</body>
+</html>
