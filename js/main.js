@@ -231,12 +231,16 @@ function mobileInit(roles) {
   // Card is always 260×412px (identical to desktop). Scale it down to fit
   // the available swipe area so proportions are pixel-identical to desktop.
   const CARD_W = 260, CARD_H = 412;
-  const cardScale = Math.min(
+  const computeScale = () => Math.min(
     1,
     (swipeArea.offsetHeight * 0.90) / CARD_H,
     (swipeArea.offsetWidth  * 0.88) / CARD_W
   );
-  const sc = `scale(${cardScale.toFixed(4)})`;
+  // On iOS Safari the mq `change` event can fire before the CSS layout has
+  // settled (offsetHeight is still 0).  Start with whatever we get and let
+  // animTick self-correct on the first frame that has real dimensions.
+  let cardScale = computeScale();
+  let sc = `scale(${cardScale.toFixed(4)})`;
 
   // ── BUILD ────────────────────────────────────────────────────
   const card = document.createElement('div');
@@ -309,6 +313,12 @@ function mobileInit(roles) {
 
   // ── SWING + TILT ─────────────────────────────────────────────
   function animTick() {
+    // Self-correct if scale was 0 at init time (iOS Safari layout timing)
+    if (cardScale === 0 && swipeArea.offsetHeight > 0) {
+      cardScale = computeScale();
+      sc = `scale(${cardScale.toFixed(4)})`;
+    }
+
     swingPhase += 0.007;
     const swingDeg = Math.sin(swingPhase) * 2 - 1;
 
