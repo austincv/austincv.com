@@ -356,6 +356,9 @@ function mobileInit(roles) {
     const dy = e.changedTouches[0].clientY - startY;
     if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
       flipTo(current + (dx < 0 ? 1 : -1));
+    } else if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 30) {
+      // Vertical swipe — up = next card, down = prev card
+      flipTo(current + (dy < 0 ? 1 : -1));
     } else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
       // Tap — left half = prev, right half = next
       const mid = swipeArea.getBoundingClientRect().left + swipeArea.offsetWidth / 2;
