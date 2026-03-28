@@ -8,4 +8,8 @@ That said — "vibe coded" doesn't mean hands-off. Claude needed steering. The c
 
 The workflow was: describe the problem clearly, Claude fixes it. Repeat.
 
+One area Claude couldn't help with at all: assets. Sourcing, cropping, and cleaning up headshots and company logos was entirely manual. Same with cross-device testing — checking the layout across different phone screen sizes is just not something you can prompt your way out of.
+
+More pain points and learnings from this experiment to be documented here eventually.
+
 This README was also prompted — from the tube, on the way to play board games. Some things don't change.
