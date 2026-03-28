@@ -275,16 +275,18 @@ function mobileInit(roles) {
   }
 
   // ── FLIP ─────────────────────────────────────────────────────
-  function flipTo(idx) {
+  function flipTo(idx, axis = 'Y') {
     idx = Math.max(0, Math.min(total - 1, idx));
     if (idx === current || animating) return;
     const dir = idx > current ? -1 : 1;
     animating = true;
     current   = idx;
 
+    const rot = (deg) => axis === 'X' ? `rotateX(${deg}deg)` : `rotateY(${deg}deg)`;
+
     // Phase 1: rotate out to edge-on
     card.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 1, 1)';
-    card.style.transform  = `translateX(calc(-50%)) translateY(-50%) ${sc} perspective(600px) rotateY(${dir * 90}deg) rotate(-1deg)`;
+    card.style.transform  = `translateX(calc(-50%)) translateY(-50%) ${sc} perspective(600px) ${rot(dir * 90)} rotate(-1deg)`;
 
     setTimeout(() => {
       // Swap content while edge-on — invisible to viewer
@@ -292,11 +294,11 @@ function mobileInit(roles) {
 
       // Snap to opposite edge then rotate in
       card.style.transition = 'none';
-      card.style.transform  = `translateX(calc(-50%)) translateY(-50%) ${sc} perspective(600px) rotateY(${-dir * 90}deg) rotate(-1deg)`;
+      card.style.transform  = `translateX(calc(-50%)) translateY(-50%) ${sc} perspective(600px) ${rot(-dir * 90)} rotate(-1deg)`;
       void card.offsetWidth;
 
       card.style.transition = 'transform 0.28s cubic-bezier(0, 0, 0.2, 1)';
-      card.style.transform  = `translateX(calc(-50%)) translateY(-50%) ${sc} perspective(600px) rotateY(0deg) rotate(-2deg)`;
+      card.style.transform  = `translateX(calc(-50%)) translateY(-50%) ${sc} perspective(600px) rotate(-2deg)`;
 
       updateMeta(true);
 
@@ -357,8 +359,8 @@ function mobileInit(roles) {
     if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
       flipTo(current + (dx < 0 ? 1 : -1));
     } else if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 30) {
-      // Vertical swipe — up = next card, down = prev card
-      flipTo(current + (dy < 0 ? 1 : -1));
+      // Vertical swipe — up = next card, down = prev card (flip on X axis)
+      flipTo(current + (dy < 0 ? 1 : -1), 'X');
     } else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
       // Tap — left half = prev, right half = next
       const mid = swipeArea.getBoundingClientRect().left + swipeArea.offsetWidth / 2;
