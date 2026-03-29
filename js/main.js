@@ -265,12 +265,12 @@ function mobileInit(roles) {
       mobileHeader.classList.remove('visible');
       setTimeout(() => {
         mobileEyebrow.textContent  = roles[current].eyebrow;
-        mobileHeadline.textContent = roles[current].headline.replace(/\n/g, ' ');
+        mobileHeadline.innerHTML = roles[current].headline.replace(/\n/g, '<br>');
         mobileHeader.classList.add('visible');
       }, 280);
     } else {
       mobileEyebrow.textContent  = roles[current].eyebrow;
-      mobileHeadline.textContent = roles[current].headline.replace(/\n/g, ' ');
+      mobileHeadline.innerHTML = roles[current].headline.replace(/\n/g, '<br>');
     }
   }
 
