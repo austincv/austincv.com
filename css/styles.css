@@ -88,7 +88,8 @@ body {
   margin-top: 40px;
 }
 
-.linkedin-btn {
+.linkedin-btn,
+.github-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -334,7 +335,7 @@ body {
     left: 50px;
     right: 50px;
     font-family: 'Instrument Serif', serif;
-    font-size: 51.2px;
+    font-size: clamp(28px, 8.5vw, 44px);
     line-height: 1.08;
     letter-spacing: -.02em;
     text-align: center;
@@ -405,7 +406,29 @@ body {
     border-color: #d0d0d0;
   }
 
+  .mobile-links {
+    position: absolute;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+  }
 
+  .mobile-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 11px;
+    letter-spacing: .02em;
+    color: color-mix(in srgb, var(--current-accent, #888) 60%, #888);
+    background: color-mix(in srgb, var(--current-accent, #888) 7%, transparent);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform .2s, box-shadow .2s;
+  }
 
 }
 
@@ -415,18 +438,22 @@ body {
     margin-bottom: 8px;
   }
   .mobile-headline {
-    font-size: 38px;
+    font-size: clamp(22px, 7vw, 32px);
   }
   /* Card interior proportions are preserved by JS scale() — no overrides needed */
 }
 
 /* ─── HOVER (pointer devices only) ───────────────────────── */
 @media (hover: hover) {
-  .linkedin-btn:hover {
+  .linkedin-btn:hover,
+  .github-btn:hover,
+  .mobile-link-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0,0,0,.10);
   }
-  .linkedin-btn:active {
+  .linkedin-btn:active,
+  .github-btn:active,
+  .mobile-link-btn:active {
     transform: translateY(1px);
     box-shadow: 0 2px 6px rgba(0,0,0,.08);
   }
