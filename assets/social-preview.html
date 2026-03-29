@@ -12,7 +12,6 @@
     --black:  #0d0d0d;
     --white:  #fafaf8;
     --grey:   #888;
-    --light:  #e8e8e4;
     --accent: #0d2358;
   }
 
@@ -30,21 +29,8 @@
     height: 630px;
     display: flex;
     align-items: center;
-    padding: 0 80px 0 100px;
-    gap: 60px;
-    position: relative;
-  }
-
-  /* Left accent bar */
-  .card::before {
-    content: '';
-    position: absolute;
-    left: 52px;
-    top: 72px;
-    bottom: 72px;
-    width: 5px;
-    background: var(--accent);
-    border-radius: 3px;
+    padding: 0 60px 0 110px;
+    gap: 40px;
   }
 
   /* Text block */
@@ -52,71 +38,152 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0;
   }
 
   .eyebrow {
     font-family: 'DM Sans', sans-serif;
     font-weight: 500;
-    font-size: 15px;
-    letter-spacing: 0.12em;
+    font-size: 13px;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--grey);
-    margin-bottom: 18px;
+    margin-bottom: 22px;
   }
 
   .name {
     font-family: 'Instrument Serif', serif;
     font-weight: 400;
-    font-size: 68px;
+    font-size: 72px;
     line-height: 1.05;
+    letter-spacing: -0.02em;
     color: var(--black);
     margin-bottom: 28px;
   }
 
   .divider {
     width: 100%;
-    height: 1.5px;
-    background: var(--light);
-    margin-bottom: 24px;
+    height: 1px;
+    background: #e0e0e0;
+    margin-bottom: 26px;
   }
 
   .sub {
     font-family: 'DM Sans', sans-serif;
     font-weight: 300;
-    font-size: 22px;
-    line-height: 1.55;
+    font-size: 20px;
+    line-height: 1.6;
     color: var(--grey);
-    max-width: 520px;
-    margin-bottom: 40px;
+    max-width: 490px;
   }
 
-  .url {
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 400;
-    font-size: 18px;
-    color: var(--accent);
-    letter-spacing: 0.02em;
-  }
-
-  /* Photo */
-  .photo-wrap {
+  /* ── ID CARD MOCKUP ─────────────────────────── */
+  .id-card-scene {
     flex-shrink: 0;
-    width: 220px;
-    height: 220px;
-    border-radius: 50%;
-    background: linear-gradient(160deg, rgba(255,255,255,0.85) 0%, var(--accent) 100%);
-    padding: 4px;
-    box-shadow: 0 8px 40px rgba(13, 35, 88, 0.18);
+    width: 430px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
   }
 
-  .photo-wrap img {
+  .id-card-shadow {
+    position: absolute;
+    width: 290px;
+    height: 460px;
+    border-radius: 16px;
+    background: transparent;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.18), 0 12px 28px rgba(0,0,0,0.08);
+  }
+
+  .id-card {
+    position: relative;
+    width: 290px;
+    height: 460px;
+    border-radius: 16px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  /* Accent stripe */
+  .ic-stripe {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 7px;
+    background: var(--accent);
+  }
+
+  .ic-inner {
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 24px 22px;
+    position: relative;
+  }
+
+  .ic-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-bottom: 22px;
+    margin-top: 6px;
+  }
+
+  .ic-photo {
+    width: 145px;
+    height: 145px;
     border-radius: 50%;
     object-fit: cover;
     object-position: center top;
-    display: block;
+    border: 3px solid #f0f0f0;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+    background: linear-gradient(160deg, rgba(255,255,255,0.85) 0%, var(--accent) 100%);
+  }
+
+  .ic-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 20px;
+    text-align: center;
+    line-height: 1.2;
+    margin-bottom: 7px;
+    color: #111;
+  }
+
+  .ic-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+    text-align: center;
+  }
+
+  .ic-divider {
+    width: 34px;
+    height: 1px;
+    background: #e0e0e0;
+    margin-bottom: 18px;
+  }
+
+  .ic-logo {
+    margin-top: auto;
+    max-width: 180px;
+    max-height: 86px;
+    object-fit: contain;
+  }
+
+  .ic-dates {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 10px;
+    color: #bbb;
+    letter-spacing: 0.08em;
+    margin-top: 10px;
   }
 </style>
 </head>
@@ -127,10 +194,22 @@
       <h1 class="name">Austin<br>Chungath Vincent</h1>
       <div class="divider"></div>
       <p class="sub">Architecting the data foundations for next-gen analytics and ML. Exploring a decade of scaling platforms from Fintech to Energy.</p>
-      <span class="url">austincv.com</span>
     </div>
-    <div class="photo-wrap">
-      <img src="../assets/headshots/default.png" alt="Austin Chungath Vincent">
+
+    <div class="id-card-scene">
+      <div class="id-card-shadow"></div>
+      <div class="id-card">
+        <div class="ic-stripe"></div>
+        <div class="ic-inner">
+          <p class="ic-label">ID · Hartree Partners</p>
+          <img class="ic-photo" src="../assets/headshots/default.png" alt="Austin Chungath Vincent">
+          <p class="ic-name">Austin<br>Chungath Vincent</p>
+          <p class="ic-title">Tech Lead</p>
+          <div class="ic-divider"></div>
+          <img class="ic-logo" src="../assets/logos/horizontal/hartree.png" alt="Hartree Partners">
+          <p class="ic-dates">Mar 2026 — Present</p>
+        </div>
+      </div>
     </div>
   </div>
 </body>
