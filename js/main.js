@@ -422,7 +422,7 @@ const mq = window.matchMedia('(max-width: 768px)');
 
 function preloadImages(roles) {
   roles.forEach(role => {
-    [role.headshot, role.logo, role.logoHorizontal].forEach(src => {
+    [role.headshot, role.logoHorizontal].forEach(src => {
       if (src) { const img = new Image(); img.src = src; }
     });
   });
