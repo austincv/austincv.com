@@ -201,7 +201,9 @@ Do not add `min-height` to any mobile flex children — it will break the no-scr
 - LinkedIn: `https://linkedin.com/in/austincv`
 - GitHub: `https://github.com/austincv`
 
-These appear in the desktop left panel and the mobile bottom buttons. Do not add other links without being asked.
+**Desktop left panel:** LinkedIn only ("Let's connect" button). Do not add the GitHub link here without being asked.
+
+**Mobile:** No link buttons. The mobile footer contains only the progress dots. Do not add social links to mobile without being asked.
 
 ---
 

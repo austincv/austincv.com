@@ -88,8 +88,7 @@ body {
   margin-top: 40px;
 }
 
-.linkedin-btn,
-.github-btn {
+.linkedin-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -406,29 +405,7 @@ body {
     border-color: #d0d0d0;
   }
 
-  .mobile-links {
-    position: absolute;
-    bottom: max(14px, env(safe-area-inset-bottom));
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 10px;
-  }
 
-  .mobile-link-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: 12px;
-    font-size: 11px;
-    letter-spacing: .02em;
-    color: color-mix(in srgb, var(--current-accent, #888) 60%, #888);
-    background: color-mix(in srgb, var(--current-accent, #888) 7%, transparent);
-    text-decoration: none;
-    white-space: nowrap;
-    transition: transform .2s, box-shadow .2s;
-  }
 
 }
 
@@ -445,15 +422,11 @@ body {
 
 /* ─── HOVER (pointer devices only) ───────────────────────── */
 @media (hover: hover) {
-  .linkedin-btn:hover,
-  .github-btn:hover,
-  .mobile-link-btn:hover {
+  .linkedin-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(0,0,0,.10);
   }
-  .linkedin-btn:active,
-  .github-btn:active,
-  .mobile-link-btn:active {
+  .linkedin-btn:active {
     transform: translateY(1px);
     box-shadow: 0 2px 6px rgba(0,0,0,.08);
   }
