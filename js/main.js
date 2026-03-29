@@ -226,7 +226,6 @@ function mobileInit(roles) {
   let tiltX = 0, tiltY = 0;
   let touchNX = 0.5, touchNY = 0.5;
   let rafId;
-  let dragActive = false;
 
   // ── SCALE ────────────────────────────────────────────────────
   // Card is always 260×412px (identical to desktop). Scale it down to fit
@@ -332,7 +331,7 @@ function mobileInit(roles) {
     swingPhase += 0.007;
     const swingDeg = Math.sin(swingPhase) * 2 - 1;
 
-    if (!animating && !dragActive) {
+    if (!animating) {
       const targetTY =  (touchNX * 2 - 1) * 18;
       const targetTX = -(touchNY * 2 - 1) * 12;
       tiltX += (targetTX - tiltX) * 0.09;
@@ -346,222 +345,50 @@ function mobileInit(roles) {
   }
 
   // ── GESTURE DETECTION ────────────────────────────────────────
-  // Physical card-flip: drag maps 1:1 to rotateY, content swaps at the
-  // invisible 90° edge-on midpoint, release commits or springs back.
+  let startX = 0, startY = 0;
 
-  let dragStartX    = 0;
-  let dragRawAngle  = 0;   // 0→±90: rotating to edge; ±90→±180: new face sliding in
-  let dragSwapped   = false;
-  let dragDir       = 0;   // −1 = next, +1 = prev
-  let dragTargetIdx = -1;
-  let dragVelX      = 0;   // px/ms (positive = right)
-  let dragLastX     = 0;
-  let dragLastTime  = 0;
-
-  // Pixels of drag that equals 90° — roughly one scaled card half-width.
-  function dragHalfW() { return Math.max(70, (CARD_W * cardScale) / 2); }
-
-  // Map raw angle to the visible rotateY value.
-  // 0→90: card tilts to edge-on. 90→180: new face sweeps in.
-  function toDisplayAngle(raw) {
-    const a = Math.abs(raw);
-    return (raw < 0 ? -1 : 1) * (a <= 90 ? a : 180 - a);
-  }
-
-  function setDragTransform() {
-    const disp = toDisplayAngle(dragRawAngle);
-    card.style.transition = 'none';
-    card.style.transform  =
-      `translateX(calc(-50%)) translateY(-50%) ${sc} perspective(600px) rotateY(${disp.toFixed(2)}deg) rotate(-2deg)`;
-  }
-
-  function springBack() {
-    if (dragSwapped) {
-      card.innerHTML = buildCardInner(roles[current]);
-      dragSwapped = false;
-    }
-    dragRawAngle = 0;
-    dragDir      = 0;
-    card.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-    card.style.transform  =
-      `translateX(calc(-50%)) translateY(-50%) ${sc} perspective(600px) rotate(-2deg) rotateX(0deg) rotateY(0deg)`;
-    setTimeout(() => { card.style.transition = ''; }, 500);
-  }
-
-  function completeFlipTo(targetIdx) {
-    animating = true;
-    const s0 = sc; // snapshot current scale
-
-    if (dragSwapped) {
-      // Content already swapped — animate the new face from its current angle to rest.
-      const disp = toDisplayAngle(dragRawAngle);
-      const dur  = Math.max(0.08, Math.abs(disp) / 90 * 0.28);
-      card.style.transition = `transform ${dur.toFixed(2)}s cubic-bezier(0, 0, 0.2, 1)`;
-      card.style.transform  =
-        `translateX(calc(-50%)) translateY(-50%) ${s0} perspective(600px) rotateY(0deg) rotate(-2deg)`;
-      current = targetIdx;
-      updateMeta(true);
-      setTimeout(() => {
-        animating    = false;
-        dragRawAngle = 0;
-        dragSwapped  = false;
-        dragDir      = 0;
-        swingPhase   = Math.PI + Math.PI / 6;
-        tiltX = tiltY = 0;
-        card.style.transition = '';
-        card.style.transform  =
-          `translateX(calc(-50%)) translateY(-50%) ${s0} perspective(600px) rotate(-2deg) rotateX(0deg) rotateY(0deg)`;
-      }, dur * 1000 + 20);
-    } else {
-      // Not yet at midpoint — snap to edge, swap, then rotate in.
-      const dir  = dragDir !== 0 ? dragDir : (targetIdx > current ? -1 : 1);
-      const edge = dir < 0 ? -90 : 90;
-      card.style.transition = 'transform 0.15s cubic-bezier(0.4, 0, 1, 1)';
-      card.style.transform  =
-        `translateX(calc(-50%)) translateY(-50%) ${s0} perspective(600px) rotateY(${edge}deg) rotate(-1deg)`;
-      setTimeout(() => {
-        card.innerHTML = buildCardInner(roles[targetIdx]);
-        card.style.transition = 'none';
-        card.style.transform  =
-          `translateX(calc(-50%)) translateY(-50%) ${s0} perspective(600px) rotateY(${-edge}deg) rotate(-1deg)`;
-        void card.offsetWidth;
-        card.style.transition = 'transform 0.28s cubic-bezier(0, 0, 0.2, 1)';
-        card.style.transform  =
-          `translateX(calc(-50%)) translateY(-50%) ${s0} perspective(600px) rotateY(0deg) rotate(-2deg)`;
-        current = targetIdx;
-        updateMeta(true);
-        setTimeout(() => {
-          animating    = false;
-          dragRawAngle = 0;
-          dragDir      = 0;
-          swingPhase   = Math.PI + Math.PI / 6;
-          tiltX = tiltY = 0;
-          card.style.transition = '';
-          card.style.transform  =
-            `translateX(calc(-50%)) translateY(-50%) ${s0} perspective(600px) rotate(-2deg) rotateX(0deg) rotateY(0deg)`;
-        }, 290);
-      }, 150);
-    }
-  }
-
-  function handleDragMove(clientX) {
-    const now = performance.now();
-    const dt  = now - dragLastTime;
-    if (dt > 0) {
-      dragVelX     = (clientX - dragLastX) / dt;
-      dragLastX    = clientX;
-      dragLastTime = now;
-    }
-
-    const dx      = clientX - dragStartX;
-    const halfW   = dragHalfW();
-    const newDir  = dx < 0 ? -1 : dx > 0 ? 1 : dragDir;
-    const nextIdx = current + (newDir < 0 ? 1 : -1);
-    const atEdge  = nextIdx < 0 || nextIdx >= total;
-
-    let raw;
-    if (atEdge || newDir === 0) {
-      raw = -(dx / halfW) * 90 * 0.18;  // rubber-band at boundaries
-    } else {
-      dragDir = newDir;
-      raw = -(dx / halfW) * 90;
-    }
-
-    // Cap at 175° — final snap to 0 is handled by completeFlipTo
-    const sign   = raw < 0 ? -1 : 1;
-    dragRawAngle = sign * Math.min(Math.abs(raw), 175);
-
-    // Swap content at the invisible 90° edge-on midpoint
-    if (!dragSwapped && Math.abs(dragRawAngle) >= 90 && dragDir !== 0 && !atEdge) {
-      dragSwapped   = true;
-      dragTargetIdx = nextIdx;
-      card.innerHTML = buildCardInner(roles[dragTargetIdx]);
-    }
-
-    setDragTransform();
-  }
-
-  function handleDragEnd(clientX) {
-    if (!dragActive) return;
-    dragActive = false;
-    touchNX = 0.5; touchNY = 0.5;
-
-    const absRaw = Math.abs(dragRawAngle);
-    const absVel = Math.abs(dragVelX);
-    const velDir = dragVelX < 0 ? -1 : 1;
-
-    // Tap: barely moved and barely fast
-    if (absRaw < 8 && absVel < 0.15) {
-      if (dragSwapped) { card.innerHTML = buildCardInner(roles[current]); dragSwapped = false; }
-      const mid    = swipeArea.getBoundingClientRect().left + swipeArea.offsetWidth / 2;
-      const tapIdx = current + (clientX < mid ? -1 : 1);
-      if (tapIdx >= 0 && tapIdx < total) flipTo(tapIdx);
-      return;
-    }
-
-    const targetIdx   = dragSwapped
-      ? dragTargetIdx
-      : (dragDir !== 0 ? current + (dragDir < 0 ? 1 : -1) : -1);
-    const validTarget = targetIdx >= 0 && targetIdx < total;
-
-    const shouldComplete = validTarget && (
-      dragSwapped ||                                             // already past midpoint
-      (absRaw > 45 && dragDir !== 0) ||                        // past angle threshold
-      (absVel > 0.35 && velDir === dragDir && absRaw > 10)     // momentum flick
-    );
-
-    if (shouldComplete) {
-      completeFlipTo(targetIdx);
-    } else {
-      springBack();
-    }
-  }
-
-  // Touch
   swipeArea.addEventListener('touchstart', e => {
-    if (animating) return;
-    const t      = e.touches[0];
-    dragStartX   = t.clientX;
-    dragLastX    = t.clientX;
-    dragLastTime = performance.now();
-    dragActive   = true;
-    dragRawAngle = 0;
-    dragVelX     = 0;
-    dragSwapped  = false;
-    dragDir      = 0;
-    dragTargetIdx = -1;
+    startX  = e.touches[0].clientX;
+    startY  = e.touches[0].clientY;
+    touchNX = startX / window.innerWidth;
+    touchNY = startY / window.innerHeight;
   }, { passive: true, signal });
 
   swipeArea.addEventListener('touchmove', e => {
-    if (!dragActive || animating) return;
-    handleDragMove(e.touches[0].clientX);
+    touchNX = e.touches[0].clientX / window.innerWidth;
+    touchNY = e.touches[0].clientY / window.innerHeight;
   }, { passive: true, signal });
 
-  swipeArea.addEventListener('touchend',    e => { handleDragEnd(e.changedTouches[0].clientX); }, { signal });
-  swipeArea.addEventListener('touchcancel', () => { if (dragActive) { dragActive = false; springBack(); } }, { signal });
-
-  // Mouse (desktop testing of mobile layout)
-  swipeArea.addEventListener('mousedown', e => {
-    if (animating) return;
-    dragStartX   = e.clientX;
-    dragLastX    = e.clientX;
-    dragLastTime = performance.now();
-    dragActive   = true;
-    dragRawAngle = 0;
-    dragVelX     = 0;
-    dragSwapped  = false;
-    dragDir      = 0;
-    dragTargetIdx = -1;
-    e.preventDefault();
+  swipeArea.addEventListener('touchend', e => {
+    touchNX = 0.5; touchNY = 0.5;
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
+      flipTo(current + (dx < 0 ? 1 : -1));
+    } else if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 30) {
+      // Vertical swipe — swipe up (scroll down) = next card, swipe down = prev card
+      flipTo(current + (dy < 0 ? 1 : -1), 'X');
+    } else if (Math.abs(dx) < 10 && Math.abs(dy) < 10) {
+      // Tap — left half = prev, right half = next
+      const mid = swipeArea.getBoundingClientRect().left + swipeArea.offsetWidth / 2;
+      flipTo(current + (startX < mid ? -1 : 1));
+    }
   }, { signal });
 
-  swipeArea.addEventListener('mousemove', e => {
-    if (!dragActive || animating) return;
-    handleDragMove(e.clientX);
-  }, { signal });
+  swipeArea.addEventListener('touchcancel', () => { touchNX = 0.5; touchNY = 0.5; }, { signal });
 
-  swipeArea.addEventListener('mouseup',    e => { handleDragEnd(e.clientX); }, { signal });
-  swipeArea.addEventListener('mouseleave', () => { if (dragActive) { dragActive = false; springBack(); } }, { signal });
+  // Mouse (for desktop testing)
+  let mouseStartX = 0;
+  swipeArea.addEventListener('mousedown', e => { mouseStartX = e.clientX; e.preventDefault(); }, { signal });
+  swipeArea.addEventListener('click', e => {
+    const dx = e.clientX - mouseStartX;
+    if (Math.abs(dx) > 30) {
+      flipTo(current + (dx < 0 ? 1 : -1));
+    } else {
+      const mid = swipeArea.getBoundingClientRect().left + swipeArea.offsetWidth / 2;
+      flipTo(current + (e.clientX < mid ? -1 : 1));
+    }
+  }, { signal });
 
   // ── INIT ─────────────────────────────────────────────────────
   updateMeta(false);
