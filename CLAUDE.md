@@ -205,6 +205,81 @@ These appear in the desktop left panel and the mobile bottom buttons. Do not add
 
 ---
 
+## Taking screenshots in headless mode
+
+The site uses Google Fonts (Instrument Serif + DM Sans). In this environment Google Fonts URLs are blocked, so Playwright screenshots will fall back to system fonts unless fonts are embedded manually.
+
+**The working approach** — install fontsource packages, base64-encode the woff2 files, and inject them as `@font-face` data URIs into the HTML before rendering:
+
+```bash
+# Install font packages (in /tmp to avoid polluting the repo)
+cd /tmp && npm install @fontsource/instrument-serif @fontsource/dm-sans
+```
+
+```js
+const {chromium} = require('/opt/node22/lib/node_modules/playwright');
+const fs = require('fs');
+
+function toDataURI(filePath) {
+  return 'data:font/woff2;base64,' + fs.readFileSync(filePath).toString('base64');
+}
+
+const fontDir = (pkg, file) =>
+  `/tmp/node_modules/@fontsource/${pkg}/files/${file}`;
+
+const fontCss = `
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: normal;
+  font-weight: 400;
+  src: url('${toDataURI(fontDir('instrument-serif', 'instrument-serif-latin-400-normal.woff2'))}') format('woff2');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 300;
+  src: url('${toDataURI(fontDir('dm-sans', 'dm-sans-latin-300-normal.woff2'))}') format('woff2');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('${toDataURI(fontDir('dm-sans', 'dm-sans-latin-400-normal.woff2'))}') format('woff2');
+}
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 500;
+  src: url('${toDataURI(fontDir('dm-sans', 'dm-sans-latin-500-normal.woff2'))}') format('woff2');
+}`;
+
+let html = fs.readFileSync('path/to/page.html', 'utf8');
+// Remove Google Fonts network requests
+html = html.replace(/<link rel="preconnect"[^>]*>\n?/g, '');
+html = html.replace(/<link href="https:\/\/fonts\.googleapis\.com[^>]*>\n?/g, '');
+// Inject fonts
+html = html.replace('</style>', fontCss + '\n</style>');
+// Fix relative asset paths for file:// protocol
+html = html.replace(/src="\.\.\//g, 'src="file:///home/user/austincv.com/');
+
+fs.writeFileSync('/tmp/render.html', html);
+
+const browser = await chromium.launch();
+const page = await browser.newPage();
+await page.setViewportSize({ width: 1200, height: 630 });
+await page.goto('file:///tmp/render.html', { waitUntil: 'load' });
+await page.waitForTimeout(1000); // let fonts paint
+await page.screenshot({ path: 'output.png', clip: { x: 0, y: 0, width: 1200, height: 630 } });
+await browser.close();
+```
+
+**Key points:**
+- Playwright is at `/opt/node22/lib/node_modules/playwright`; Chromium binary is pre-cached at `/root/.cache/ms-playwright/chromium-1194/chrome-linux/chrome`
+- Use `waitUntil: 'load'` not `'networkidle'` — the latter times out when Google Fonts is unreachable
+- `../` relative paths in `src` attributes must be rewritten to `file://` absolute paths when loading HTML via `file://` protocol
+
+---
+
 ## What's intentionally absent
 
 - No analytics, no tracking
