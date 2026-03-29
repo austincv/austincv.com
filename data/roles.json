@@ -10,8 +10,7 @@
     "eyebrow": "Energy Trading · EMEA",
     "sub": "Architecting the data foundations to enable cutting-edge analytics and machine learning across EMEA Power & Gas markets.",
     "headshot": "assets/headshots/default.png",
-    "logo": "assets/logos/hartree.png",
-    "logoHorizontal": "assets/logos/horizontal/hartree.png"
+    "logo": "assets/logos/horizontal/hartree.png"
   },
   {
     "id": "dojo",
@@ -24,8 +23,7 @@
     "eyebrow": "Data Engineering · Payments",
     "sub": "Spent four years ensuring data was a competitive advantage by building a state-of-the-art analytics platform for data teams.",
     "headshot": "assets/headshots/default.png",
-    "logo": "assets/logos/dojo.png",
-    "logoHorizontal": "assets/logos/horizontal/dojo.png"
+    "logo": "assets/logos/horizontal/dojo.png"
   },
   {
     "id": "hummingbird",
@@ -38,8 +36,7 @@
     "eyebrow": "AI for Agriculture · Drones · Satellite",
     "sub": "As a founding engineer, I built the MLOps infrastructure and core libraries to transform raw drone imagery into field-level insights.",
     "headshot": "assets/headshots/default.png",
-    "logo": "assets/logos/hummingbird.png",
-    "logoHorizontal": "assets/logos/horizontal/hummingbird.png"
+    "logo": "assets/logos/horizontal/hummingbird.png"
   },
   {
     "id": "think-big",
@@ -52,8 +49,7 @@
     "eyebrow": "Big Data · Consulting",
     "sub": "Learned the art of 'Big Data' at Vodafone scale, migrating legacy infrastructure to Spark and slashing processing times from days to hours.",
     "headshot": "assets/headshots/default.png",
-    "logo": "assets/logos/think-big.png",
-    "logoHorizontal": "assets/logos/horizontal/teradata.png"
+    "logo": "assets/logos/horizontal/teradata.png"
   },
   {
     "id": "big-data-partnership",
@@ -66,8 +62,7 @@
     "eyebrow": "Big Data . Hadoop Ecosystem",
     "sub": "Diving into deep learning and real-time monitoring to extract meaning from live video feeds and sentiment data.",
     "headshot": "assets/headshots/default.png",
-    "logo": "assets/logos/big-data-partnership.png",
-    "logoHorizontal": "assets/logos/horizontal/big-data-partnership.png"
+    "logo": "assets/logos/horizontal/big-data-partnership.png"
   },
   {
     "id": "mu-sigma",
@@ -80,7 +75,6 @@
     "eyebrow": "Research · Data Science",
     "sub": "Starting with a focus on research, leading teams to bridge the gap between Hadoop frameworks and custom computer vision algorithms.",
     "headshot": "assets/headshots/default.png",
-    "logo": "assets/logos/mu-sigma.png",
-    "logoHorizontal": "assets/logos/horizontal/mu-sigma.png"
+    "logo": "assets/logos/horizontal/mu-sigma.png"
   }
 ]

@@ -10,7 +10,7 @@ function buildCardInner(role) {
       <div class="card-name">Austin<br>Chungath Vincent</div>
       <div class="card-title">${role.title}</div>
       <div class="card-divider"></div>
-      <img class="card-logo-horizontal" src="${role.logoHorizontal}" alt="${role.company} logo">
+      <img class="card-logo-horizontal" src="${role.logo}" alt="${role.company} logo">
       <div class="card-dates">${role.dates}</div>
     </div>`;
 }
@@ -422,7 +422,7 @@ const mq = window.matchMedia('(max-width: 768px)');
 
 function preloadImages(roles) {
   roles.forEach(role => {
-    [role.headshot, role.logoHorizontal].forEach(src => {
+    [role.headshot, role.logo].forEach(src => {
       if (src) { const img = new Image(); img.src = src; }
     });
   });
