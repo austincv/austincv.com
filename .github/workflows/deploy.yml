@@ -27,8 +27,9 @@ jobs:
       - name: Prepare site
         run: |
           mkdir _site
-          cp index.html _site/
-          cp -r css     _site/
+          cp index.html  _site/
+          cp favicon.svg _site/
+          cp -r css      _site/
           cp -r js      _site/
           cp -r data    _site/
           cp -r assets  _site/
