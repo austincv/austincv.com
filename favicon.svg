@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Background: tan/caramel -->
+  <rect width="32" height="32" rx="5" fill="#c4a882"/>
+  <!-- Card body: warm white, portrait ID-1 proportions (16×25px ≈ 53.98×85.60mm) -->
+  <rect x="8" y="4" width="16" height="25" rx="2" fill="#fafaf8"/>
+  <!-- Accent stripe at top, clipped to card's rounded corners -->
+  <clipPath id="c">
+    <rect x="8" y="4" width="16" height="25" rx="2"/>
+  </clipPath>
+  <rect x="8" y="4" width="16" height="4" fill="#0d2358" clip-path="url(#c)"/>
+</svg>
