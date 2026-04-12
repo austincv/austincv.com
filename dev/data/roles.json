@@ -1,0 +1,80 @@
+[
+  {
+    "id": "hartree",
+    "company": "Hartree Partners",
+    "title": "Tech Lead",
+    "dates": "Mar 2026 – Present",
+    "accent": "#0d2358",
+    "icon": "H",
+    "headline": "Building the\nenergy data stack.",
+    "eyebrow": "Energy Trading · EMEA",
+    "sub": "I am currently working on the data foundations to enable cutting-edge analytics and machine learning across EMEA Power & Gas markets.",
+    "headshot": "assets/headshots/default.png",
+    "logo": "assets/logos/hartree.png"
+  },
+  {
+    "id": "dojo",
+    "company": "DOJO",
+    "title": "Lead Data Engineer",
+    "dates": "Apr 2021 – Oct 2025",
+    "accent": "#2d6b5c",
+    "icon": "D",
+    "headline": "Scaling the\ndata platform.",
+    "eyebrow": "Data Engineering · Payments",
+    "sub": "Earlier, I spent four years ensuring data was a competitive advantage by building a state-of-the-art analytics platform for data teams at DOJO.",
+    "headshot": "assets/headshots/default.png",
+    "logo": "assets/logos/dojo.png"
+  },
+  {
+    "id": "hummingbird",
+    "company": "Hummingbird",
+    "title": "Principal Technical Architect",
+    "dates": "Oct 2016 – Apr 2021",
+    "accent": "#1e4d2b",
+    "icon": "H",
+    "headline": "Shaping the\nfuture of AgTech.",
+    "eyebrow": "AI for Agriculture · Drones · Satellite",
+    "sub": "As a founding engineer, I built the MLOps infrastructure and core libraries to transform raw drone imagery into field-level insights.",
+    "headshot": "assets/headshots/default.png",
+    "logo": "assets/logos/hummingbird.png"
+  },
+  {
+    "id": "think-big",
+    "company": "Think Big",
+    "title": "Big Data Engineer",
+    "dates": "Jul 2016 – Oct 2016",
+    "accent": "#c84b00",
+    "icon": "T",
+    "headline": "Mastering the\nmigration.",
+    "eyebrow": "Big Data · Consulting",
+    "sub": "Learned the art of 'Big Data' at Vodafone scale, migrating legacy infrastructure to Spark and slashing processing times from days to hours.",
+    "headshot": "assets/headshots/default.png",
+    "logo": "assets/logos/teradata.png"
+  },
+  {
+    "id": "big-data-partnership",
+    "company": "Big Data Partnership",
+    "title": "Big Data Engineer",
+    "dates": "Sep 2014 – Jul 2016",
+    "accent": "#1e7a72",
+    "icon": "B",
+    "headline": "Beyond the\nnumbers.",
+    "eyebrow": "Big Data . Hadoop Ecosystem",
+    "sub": "Diving into deep learning and real-time monitoring to extract meaning from live video feeds and sentiment data.",
+    "headshot": "assets/headshots/default.png",
+    "logo": "assets/logos/big-data-partnership.png"
+  },
+  {
+    "id": "mu-sigma",
+    "company": "Mu Sigma",
+    "title": "Senior Research Analyst",
+    "dates": "Nov 2011 – Aug 2014",
+    "accent": "#7a1a1a",
+    "icon": "μ",
+    "headline": "Where it\nall began.",
+    "eyebrow": "Research · Data Science",
+    "sub": "Starting with a focus on research, leading teams to bridge the gap between Hadoop frameworks and custom computer vision algorithms.",
+    "headshot": "assets/headshots/default.png",
+    "logo": "assets/logos/mu-sigma.png"
+  }
+]
