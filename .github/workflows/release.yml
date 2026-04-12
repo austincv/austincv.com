@@ -1,0 +1,28 @@
+name: Release (merge dev into main)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge dev into main
+        run: |
+          git fetch origin dev
+          git merge origin/dev --no-ff -m "Release: merge dev into main [skip ci]"
+          git push origin main

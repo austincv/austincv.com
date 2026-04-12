@@ -1,15 +1,15 @@
-name: Deploy to GitHub Pages (production)
+name: Deploy to GitHub Pages (dev preview)
 
 on:
   push:
-    branches: [main]
+    branches: [dev]
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: pages-main
+  group: pages-dev
   cancel-in-progress: false
 
 jobs:
@@ -30,11 +30,10 @@ jobs:
           cp -r assets   _site/
           touch _site/.nojekyll
 
-      - name: Deploy to gh-pages (root)
+      - name: Deploy to gh-pages (dev/)
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: _site
+          target-folder: dev
           clean: true
-          clean-exclude: |
-            dev/
