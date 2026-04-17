@@ -405,6 +405,20 @@ body {
     border-color: #d0d0d0;
   }
 
+  .mobile-linkedin-icon {
+    position: absolute;
+    right: 20px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    color: #999;
+    text-decoration: none;
+    line-height: 0;
+    transition: color .2s;
+  }
+
+  .mobile-linkedin-icon:active {
+    color: #888;
+  }
+
 }
 
 /* ─── SMALL-HEIGHT PHONES (iPhone SE / 8, ≤700px tall) ──── */
