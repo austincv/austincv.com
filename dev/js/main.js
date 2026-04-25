@@ -32,6 +32,21 @@ function desktopInit(roles) {
   let currentRole = 0;
   let animating   = false;
 
+  // ── HOVER OVERLAYS ──────────────────────────────────────
+  const cardStage = card3d.closest('.card-stage');
+  const ovSpec    = document.createElement('div');
+  const ovHolo    = document.createElement('div');
+  const ovNoise   = document.createElement('div');
+  ovSpec.className  = 'card-ov-spec';
+  ovHolo.className  = 'card-ov-holo';
+  ovNoise.className = 'card-ov-noise';
+  card3d.append(ovSpec, ovHolo, ovNoise);
+
+  let cardHover  = false;
+  let cardHoverT = 0;
+  cardStage.addEventListener('mouseenter', () => { cardHover = true;  }, { signal });
+  cardStage.addEventListener('mouseleave', () => { cardHover = false; }, { signal });
+
   // Ensure we start at the top when (re-)entering desktop view
   window.scrollTo(0, 0);
 
@@ -134,6 +149,37 @@ function desktopInit(roles) {
     cardShadow.style.boxShadow =
       `${sdx.toFixed(1)}px ${sdy.toFixed(1)}px ${blur.toFixed(0)}px rgba(0,0,0,${alph.toFixed(3)})`;
 
+    // ── HOVER OVERLAYS ────────────────────────────────────
+    cardHoverT += ((cardHover && !animating ? 1 : 0) - cardHoverT) * 0.07;
+
+    if (cardHoverT > 0.005) {
+      const ht = cardHoverT;
+
+      // Specular position: map tilt → 0–100% within the card face
+      const specX = (50 + (tiltY / 18) * 58).toFixed(1);
+      const specY = (50 - (tiltX / 12) * 58).toFixed(1);
+
+      // Two-layer highlight: tight glint + wide soft bloom
+      const a1 = (0.80 * ht).toFixed(3);
+      const a2 = (0.22 * ht).toFixed(3);
+      ovSpec.style.background =
+        `radial-gradient(ellipse 45px 38px at ${specX}% ${specY}%, rgba(255,255,255,${a1}) 0%, rgba(255,255,255,0) 100%),` +
+        `radial-gradient(ellipse 140px 110px at ${specX}% ${specY}%, rgba(255,255,255,${a2}) 0%, rgba(255,255,255,0) 100%)`;
+
+      // Iridescent rainbow: angle and hue both shift with mouse direction
+      const holoAngle = Math.atan2(tiltX, tiltY) * (180 / Math.PI);
+      const h0 = ((holoAngle * 2 + 360) % 360);
+      const stops = [0, 55, 110, 165, 220, 275, 330, 360]
+        .map(d => `hsl(${Math.round((h0 + d) % 360)},100%,68%)`)
+        .join(',');
+      ovHolo.style.background = `linear-gradient(${holoAngle.toFixed(0)}deg,${stops})`;
+      ovHolo.style.opacity    = (0.14 * ht).toFixed(3);
+    } else {
+      ovSpec.style.background = '';
+      ovHolo.style.background = '';
+      ovHolo.style.opacity    = '0';
+    }
+
     rafId = requestAnimationFrame(animTick);
   }
 
@@ -216,6 +262,9 @@ function desktopInit(roles) {
     leftPanel.classList.remove('visible', 'lp-snap');
     leftPanel.style.removeProperty('--lp-slide');
     cardFront.innerHTML        = '';
+    ovSpec.remove();
+    ovHolo.remove();
+    ovNoise.remove();
     cardShadow.removeAttribute('style');
     card3d.removeAttribute('style');
   };
