@@ -74,13 +74,26 @@ function desktopInit(roles) {
 
   setTimeout(() => leftPanel.classList.add('visible'), 200);
 
-  function updateLeft(role) {
+  function updateLeft(role, direction) {
+    // direction: 1 = forward (scrolling down), -1 = backward (scrolling up)
+    const exitOffset  = direction > 0 ? '-32px' : '32px';
+    const entryOffset = direction > 0 ?  '32px' : '-32px';
+
+    leftPanel.style.setProperty('--lp-slide', exitOffset);
     leftPanel.classList.remove('visible');
+
     setTimeout(() => {
       lpEyebrow.textContent = role.eyebrow;
       lpHeadline.innerHTML  = role.headline.replace(/\n/g, '<br>');
       lpSub.textContent     = role.sub;
       document.documentElement.style.setProperty('--current-accent', role.accent);
+
+      // Snap text to entry position while invisible (no transition)
+      leftPanel.classList.add('lp-snap');
+      leftPanel.style.setProperty('--lp-slide', entryOffset);
+      void leftPanel.offsetWidth; // commit the snap
+      leftPanel.classList.remove('lp-snap');
+
       leftPanel.classList.add('visible');
     }, 280);
   }
@@ -165,7 +178,7 @@ function desktopInit(roles) {
       cardShadow.style.transition = 'transform 0.28s cubic-bezier(0, 0, 0.2, 1)';
       cardShadow.style.transform  = 'perspective(600px) rotateY(0deg) rotate(-2deg)';
 
-      updateLeft(roles[idx]);
+      updateLeft(roles[idx], idx > prevRole ? 1 : -1);
 
       setTimeout(() => {
         swingPhase = Math.PI + Math.PI / 6;
@@ -200,7 +213,8 @@ function desktopInit(roles) {
     observer.disconnect();
     nav.remove();
     rightTrack.innerHTML       = '';
-    leftPanel.classList.remove('visible');
+    leftPanel.classList.remove('visible', 'lp-snap');
+    leftPanel.style.removeProperty('--lp-slide');
     cardFront.innerHTML        = '';
     cardShadow.removeAttribute('style');
     card3d.removeAttribute('style');
