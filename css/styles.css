@@ -127,6 +127,30 @@ body {
   perspective: 1200px;
 }
 
+/* ─── CARD HOVER OVERLAYS ──────────────────────────────── */
+.card-ov-spec,
+.card-ov-holo,
+.card-ov-noise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 15px;
+}
+
+/* Specular: white radial highlight that tracks mouse position */
+.card-ov-spec { mix-blend-mode: screen; }
+
+/* Iridescent: hue-rotating rainbow, shows on darker card elements */
+.card-ov-holo { mix-blend-mode: screen; }
+
+/* Noise grain: static fractal noise for physical surface texture */
+.card-ov-noise {
+  mix-blend-mode: soft-light;
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  background-size: 200px 200px;
+}
+
 /* ─── ID CARD ─────────────────────────────────────────── */
 .id-card-wrap {
   position: relative;
