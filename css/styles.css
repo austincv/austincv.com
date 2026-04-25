@@ -52,8 +52,8 @@ body {
   color: var(--grey);
   margin-bottom: 20px;
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity .5s, transform .5s;
+  transform: translateY(var(--lp-slide, 28px));
+  transition: opacity .4s, transform .4s;
 }
 
 
@@ -64,8 +64,8 @@ body {
   letter-spacing: -.02em;
   margin-bottom: 20px;
   opacity: 0;
-  transform: translateY(12px);
-  transition: opacity .5s .06s, transform .5s .06s;
+  transform: translateY(var(--lp-slide, 28px));
+  transition: opacity .4s .05s, transform .4s .05s;
 }
 
 .left-panel .sub {
@@ -74,13 +74,18 @@ body {
   color: #555;
   max-width: 320px;
   opacity: 0;
-  transform: translateY(8px);
-  transition: opacity .5s .12s, transform .5s .12s;
+  transform: translateY(var(--lp-slide, 28px));
+  transition: opacity .4s .10s, transform .4s .10s;
 }
 
 .left-panel.visible .eyebrow,
 .left-panel.visible .headline,
-.left-panel.visible .sub { opacity: 1; transform: none; }
+.left-panel.visible .sub { opacity: 1; transform: translateY(0); }
+
+/* Snap helper: disables transition so JS can reposition text while invisible */
+.left-panel.lp-snap .eyebrow,
+.left-panel.lp-snap .headline,
+.left-panel.lp-snap .sub { transition: none !important; opacity: 0; }
 
 .links {
   display: flex;
